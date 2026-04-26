@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -e
+
+# Flutter 프로젝트가 서브디렉토리(apps/flutter)에 있어 PROJECT_ROOT를 지정
+cd "${PROJECT_ROOT:-./apps/flutter}"
+export PROJECT_ROOT=$PWD
+
+if command -v fvm >/dev/null 2>&1; then
+  export PATROL_FLUTTER_COMMAND="${PATROL_FLUTTER_COMMAND:-fvm flutter}"
+  exec fvm dart run patrol_mcp
+else
+  export PATROL_FLUTTER_COMMAND="${PATROL_FLUTTER_COMMAND:-flutter}"
+  exec dart run patrol_mcp
+fi

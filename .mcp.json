@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "patrol": {
+      "command": "./.claude/run-patrol",
+      "env": {
+        "PROJECT_ROOT": "./apps/flutter",
+        "PATROL_FLAGS": "",
+        "SHOW_TERMINAL": "true"
+      }
+    }
+  }
+}

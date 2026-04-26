@@ -1,0 +1,17 @@
+node_modules/
+.next/
+dist/
+coverage/
+.env.local
+.turbo/
+*.log
+image.png
+image2.png
+
+# Flutter
+apps/flutter/build/
+apps/flutter/.dart_tool/
+apps/flutter/.flutter-plugins
+apps/flutter/.flutter-plugins-dependencies
+apps/flutter/.packages
+apps/flutter/*.g.dart
