@@ -49,11 +49,16 @@ lexio/
   - 상태 관리 (flutter_riverpod)
   - 라우팅 (go_router)
   - 로비/대기실/게임/점수 화면 완성
+- [x] **배포 완료**
+  - 웹: Vercel (`https://lexio-web-inky.vercel.app`)
+  - 백엔드: hw-01 K8s (k3s) + ArgoCD GitOps + **Tailscale Funnel**
+  - 서버 공개 URL: `https://hyunwoo-am02.tail3d6bb4.ts.net`
+  - GitHub Actions로 GHCR 이미지 자동 빌드/푸시 → ArgoCD 자동 배포
 
 ### 진행 예정
 - [ ] 통합 테스트 (웹 ↔ Flutter 크로스 플레이)
-- [ ] 배포 (Vercel + Railway)
 - [ ] 앱 스토어 배포 (선택)
+- [ ] 도메인 취득 후 Cloudflare Tunnel 전환 (아래 마이그레이션 가이드 참고)
 
 ---
 
@@ -71,6 +76,69 @@ lexio/
 ### 앱 (apps/flutter)
 - Flutter 3.x, Dart, socket_io_client, Riverpod
 - **테스트**: Patrol 4.x + Patrol MCP (`patrol`, `patrol_mcp` dev dependency)
+
+---
+
+## 배포 인프라
+
+### 현재 구성
+
+```
+[사용자]
+    │ HTTPS
+    ▼
+[Vercel] ─── lexio-web-inky.vercel.app
+    │ NEXT_PUBLIC_SERVER_URL
+    ▼ WebSocket
+[Tailscale Funnel] ─── hyunwoo-am02.tail3d6bb4.ts.net
+    │ localhost:30001
+    ▼
+[hw-01 K8s] NodePort 30001
+    └── lexio Pod (ghcr.io/hyunwoo-company/lexio-server)
+```
+
+- **웹**: Vercel (`https://lexio-web-inky.vercel.app`)
+- **백엔드 공개 URL**: `https://hyunwoo-am02.tail3d6bb4.ts.net` (Tailscale Funnel)
+- **K8s 서비스**: NodePort 30001 → Pod 3001
+- **GitOps**: `hyunwoo-company/k8s-helm` → ArgoCD 자동 배포
+- **이미지**: GitHub Actions가 `main` 푸시 시 `ghcr.io/hyunwoo-company/lexio-server:latest` 자동 빌드
+- **Tailscale Funnel**: hw-01에서 `sudo tailscale funnel --bg http://localhost:30001` 실행 (재시작 후 자동 유지)
+
+### 도메인 취득 시 → Cloudflare Tunnel 전환 가이드
+
+Cloudflare Zero Trust 대시보드에 `lexio` 터널은 이미 생성되어 있음. 도메인 구매 후 아래 순서로 전환.
+
+#### 1. Cloudflare Zero Trust에서 Public Hostname 추가
+- Zero Trust → Networks → Tunnels → `lexio` 터널 → Public Hostnames
+- Subdomain: `api` (또는 원하는 값), Domain: 구매한 도메인
+- Service: `http://lexio:3001` (K8s 서비스 내부 주소)
+
+#### 2. cloudflared 토큰 Secret 생성 (hw-01에서)
+```bash
+kubectl create secret generic cloudflared-token \
+  --from-literal=token=<CLOUDFLARE_TUNNEL_TOKEN> \
+  -n lexio
+```
+
+#### 3. k8s-helm values.yaml 수정
+```yaml
+service:
+  type: ClusterIP   # NodePort에서 변경
+  port: 3001
+
+cloudflared:
+  enabled: true
+  image: cloudflare/cloudflared:latest
+```
+
+#### 4. Vercel 환경변수 업데이트
+- `NEXT_PUBLIC_SERVER_URL` → `https://api.your-domain.com`
+- Vercel Redeploy 실행
+
+#### 5. Tailscale Funnel 비활성화 (hw-01에서)
+```bash
+tailscale funnel off
+```
 
 ---
 
