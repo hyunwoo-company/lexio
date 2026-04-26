@@ -11,26 +11,56 @@ export function LobbyScreen() {
   const joinCodeRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<'idle' | 'create' | 'join'>('idle');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const cleanupRef = useRef<(() => void) | null>(null);
   const router = useRouter();
   const { setRoom, setRoomInfo, setError } = useGameStore();
+
+  const handleBack = () => {
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    setMode('idle');
+    setLoading(false);
+    setErrorMsg('');
+  };
 
   const handleCreate = () => {
     const name = nameRef.current?.value.trim() ?? '';
     if (!name) return;
     setLoading(true);
+    setErrorMsg('');
     const socket = getSocket();
-    if (!socket.connected) socket.connect();
 
-    socket.once('room:created', ({ roomId, room }: { roomId: string; room: RoomInfo }) => {
+    const onCreated = ({ roomId, room }: { roomId: string; room: RoomInfo }) => {
+      cleanup();
       setRoom(roomId, getClientId(), name);
       setRoomInfo(room);
       saveSession(roomId, name);
       router.push(`/room/${roomId}`);
-    });
-    socket.once('room:error', ({ reason }: { reason: string }) => {
+    };
+    const onError = ({ reason }: { reason: string }) => {
+      cleanup();
       setError(reason);
+      setErrorMsg(reason);
       setLoading(false);
-    });
+    };
+    const onConnectError = () => {
+      cleanup();
+      setErrorMsg('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      setLoading(false);
+    };
+    const cleanup = () => {
+      socket.off('room:created', onCreated);
+      socket.off('room:error', onError);
+      socket.off('connect_error', onConnectError);
+    };
+    cleanupRef.current = cleanup;
+
+    socket.on('room:created', onCreated);
+    socket.on('room:error', onError);
+    socket.on('connect_error', onConnectError);
+
+    if (!socket.connected) socket.connect();
     socket.emit('room:create', { playerName: name });
   };
 
@@ -39,19 +69,39 @@ export function LobbyScreen() {
     const joinCode = joinCodeRef.current?.value.trim().toUpperCase() ?? '';
     if (!name || !joinCode) return;
     setLoading(true);
+    setErrorMsg('');
     const socket = getSocket();
-    if (!socket.connected) socket.connect();
 
-    socket.once('room:joined', ({ roomId, room }: { roomId: string; room: RoomInfo }) => {
+    const onJoined = ({ roomId, room }: { roomId: string; room: RoomInfo }) => {
+      cleanup();
       setRoom(roomId, getClientId(), name);
       setRoomInfo(room);
       saveSession(roomId, name);
       router.push(`/room/${roomId}`);
-    });
-    socket.once('room:error', ({ reason }: { reason: string }) => {
+    };
+    const onError = ({ reason }: { reason: string }) => {
+      cleanup();
       setError(reason);
+      setErrorMsg(reason);
       setLoading(false);
-    });
+    };
+    const onConnectError = () => {
+      cleanup();
+      setErrorMsg('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      setLoading(false);
+    };
+    const cleanup = () => {
+      socket.off('room:joined', onJoined);
+      socket.off('room:error', onError);
+      socket.off('connect_error', onConnectError);
+    };
+    cleanupRef.current = cleanup;
+
+    socket.on('room:joined', onJoined);
+    socket.on('room:error', onError);
+    socket.on('connect_error', onConnectError);
+
+    if (!socket.connected) socket.connect();
     socket.emit('room:join', { roomId: joinCode, playerName: name });
   };
 
@@ -113,9 +163,13 @@ export function LobbyScreen() {
           )}
 
           {mode !== 'idle' && (
-            <button onClick={() => setMode('idle')} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
+            <button onClick={handleBack} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
               돌아가기
             </button>
+          )}
+
+          {errorMsg && (
+            <p className="text-sm text-red-400 text-center">{errorMsg}</p>
           )}
         </div>
       </div>
