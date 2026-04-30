@@ -4,29 +4,171 @@ import type { Tile as TileType } from '@lexio/game-logic';
 
 type Suit = 'sun' | 'moon' | 'star' | 'cloud';
 
-const SUIT: Record<Suit, { symbol: string; color: string; shadow: string }> = {
-  sun:   { symbol: '☀', color: '#c01010', shadow: '#800a0a' },
-  moon:  { symbol: '☽', color: '#0a7060', shadow: '#064840' },
-  star:  { symbol: '★', color: '#b07000', shadow: '#784a00' },
-  cloud: { symbol: '☁', color: '#5020a0', shadow: '#32126e' },
+// FGG 사신수 매핑:
+//   sun   = 주작 (Vermilion Bird) — 화염 봉황
+//   moon  = 청룡 (Azure Dragon)   — 비늘과 뿔
+//   star  = 백호 (White Tiger)    — 줄무늬와 王
+//   cloud = 현무 (Black Tortoise) — 육각 갑옷과 뱀
+const SUIT: Record<Suit, { name: string; color: string; deep: string }> = {
+  sun:   { name: '주작', color: '#C8323D', deep: '#8C1F28' },
+  moon:  { name: '청룡', color: '#2A8C56', deep: '#175C36' },
+  star:  { name: '백호', color: '#D88438', deep: '#8C5320' },
+  cloud: { name: '현무', color: '#3A5A8C', deep: '#1F2E4A' },
 };
 
-// w, h: 앞면 크기 / depth: 측면 두께 / dx,dy: 사선 투영 오프셋
 const SIZE = {
-  sm: { w: 38, h: 56, depth: 10, dx: 8,  dy: 6,  sym: 18, num: 13, corner: 7  },
-  md: { w: 50, h: 72, depth: 13, dx: 11, dy: 7,  sym: 24, num: 17, corner: 9  },
-  lg: { w: 62, h: 90, depth: 16, dx: 13, dy: 9,  sym: 30, num: 21, corner: 11 },
+  sm: { w: 36, h: 52, crest: 32, num: 14, corner: 9,  radius: 5 },
+  md: { w: 50, h: 72, crest: 48, num: 22, corner: 12, radius: 7 },
+  lg: { w: 64, h: 92, crest: 60, num: 30, corner: 16, radius: 9 },
 };
 
-// 앞면 색
-const FACE   = '#f0e6c8';
-const FACE_SEL = '#faf4e2';
-// 윗면 (빛 받는 면 — 더 밝게)
-const TOP    = '#faf4e2';
-const TOP_EDGE = '#c8b890'; // 윗면-앞면 경계선
-// 오른쪽 측면 (그림자 — 더 어둡게)
-const RIGHT  = '#c4b07a';
-const RIGHT_DARK = '#a09060';
+/* ──────── 사신수 Crest (viewBox 100x100 기준 SVG) ──────── */
+
+function CrestJujak({ color }: { color: string }) {
+  // 주작 — 화염 봉황: 16-spike 화염 ring + 봉황 머리/꼬리
+  const cx = 50, cy = 50;
+  const points: string[] = [];
+  const N = 16;
+  for (let i = 0; i < N * 2; i++) {
+    const a = (i * Math.PI) / N - Math.PI / 2;
+    const r = i % 2 === 0 ? 47 : 36;
+    points.push(`${cx + Math.cos(a) * r},${cy + Math.sin(a) * r}`);
+  }
+  return (
+    <g>
+      <polygon points={points.join(' ')} fill="none" stroke={color} strokeWidth={2.2} strokeLinejoin="round" />
+      {/* 12시: 봉황 볏 */}
+      <path d="M 50 6 L 47 14 L 50 12 L 53 14 Z" fill={color} />
+      <path d="M 44 9 L 42 16 L 45 14 Z" fill={color} opacity={0.85} />
+      <path d="M 56 9 L 58 16 L 55 14 Z" fill={color} opacity={0.85} />
+      {/* 6시: 꼬리깃 3가닥 */}
+      <path d="M 50 94 L 48 84 L 50 88 L 52 84 Z" fill={color} />
+      <path d="M 42 92 L 44 82 L 46 86 Z" fill={color} opacity={0.7} />
+      <path d="M 58 92 L 56 82 L 54 86 Z" fill={color} opacity={0.7} />
+      <circle cx={cx} cy={cy} r={26} fill="none" stroke={color} strokeWidth={1.6} />
+      <circle cx={cx} cy={cy} r={29} fill="none" stroke={color} strokeWidth={0.8} opacity={0.5} />
+    </g>
+  );
+}
+
+function CrestCheongryong({ color }: { color: string }) {
+  // 청룡 — 비늘 12 lobes + 두 뿔
+  const cx = 50, cy = 50;
+  const lobes = 12;
+  const path: string[] = [];
+  for (let i = 0; i <= lobes; i++) {
+    const a = (i * Math.PI * 2) / lobes - Math.PI / 2;
+    const aMid = a + Math.PI / lobes;
+    const x1 = cx + Math.cos(a) * 38;
+    const y1 = cy + Math.sin(a) * 38;
+    const xc = cx + Math.cos(aMid) * 47;
+    const yc = cy + Math.sin(aMid) * 47;
+    if (i === 0) path.push(`M ${x1} ${y1}`);
+    else path.push(`Q ${xc} ${yc} ${x1} ${y1}`);
+  }
+  return (
+    <g>
+      <path d={path.join(' ') + ' Z'} fill="none" stroke={color} strokeWidth={2.2} strokeLinejoin="round" />
+      {/* 12시: 두 뿔 */}
+      <path d="M 44 4 L 47 14 L 49 10 Z" fill={color} />
+      <path d="M 56 4 L 53 14 L 51 10 Z" fill={color} />
+      {/* 좌우 작은 빛점 */}
+      <circle cx={20} cy={50} r={1.6} fill={color} opacity={0.6} />
+      <circle cx={80} cy={50} r={1.6} fill={color} opacity={0.6} />
+      <circle cx={cx} cy={cy} r={26} fill="none" stroke={color} strokeWidth={1.6} />
+      <circle cx={cx} cy={cy} r={30} fill="none" stroke={color} strokeWidth={0.7} opacity={0.45} />
+      {[0, 60, 120, 180, 240, 300].map((deg) => {
+        const a = (deg * Math.PI) / 180 - Math.PI / 2;
+        const x = cx + Math.cos(a) * 33;
+        const y = cy + Math.sin(a) * 33;
+        return <circle key={deg} cx={x} cy={y} r={1.2} fill={color} opacity={0.5} />;
+      })}
+    </g>
+  );
+}
+
+function CrestBaekho({ color }: { color: string }) {
+  // 백호 — 줄무늬 ring + 王 무늬
+  const cx = 50, cy = 50;
+  const stripes: { x1: number; y1: number; x2: number; y2: number }[] = [];
+  for (let i = 0; i < 14; i++) {
+    const a = (i * Math.PI * 2) / 14 - Math.PI / 2;
+    const x1 = cx + Math.cos(a) * 39;
+    const y1 = cy + Math.sin(a) * 39;
+    const x2 = cx + Math.cos(a) * 47;
+    const y2 = cy + Math.sin(a) * 47;
+    stripes.push({ x1, y1, x2, y2 });
+  }
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={47} fill="none" stroke={color} strokeWidth={1.4} />
+      <circle cx={cx} cy={cy} r={39} fill="none" stroke={color} strokeWidth={1.4} />
+      {stripes.map((s, i) => (
+        <line key={i} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke={color} strokeWidth={2.4} strokeLinecap="round" />
+      ))}
+      {/* 12시: 王자 모티프 */}
+      <line x1={50} y1={5} x2={50} y2={20} stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <line x1={45} y1={9} x2={55} y2={9} stroke={color} strokeWidth={1.4} strokeLinecap="round" />
+      <line x1={43} y1={14} x2={57} y2={14} stroke={color} strokeWidth={1.4} strokeLinecap="round" />
+      <line x1={45} y1={18} x2={55} y2={18} stroke={color} strokeWidth={1.4} strokeLinecap="round" />
+      <circle cx={cx} cy={cy} r={26} fill="none" stroke={color} strokeWidth={1.6} />
+    </g>
+  );
+}
+
+function CrestHyunmu({ color }: { color: string }) {
+  // 현무 — 육각 갑옷 + 뱀
+  const cx = 50, cy = 50;
+  const hexagons: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const a = (i * Math.PI * 2) / 6 - Math.PI / 2;
+    const hx = cx + Math.cos(a) * 38;
+    const hy = cy + Math.sin(a) * 38;
+    const pts: string[] = [];
+    for (let j = 0; j < 6; j++) {
+      const ha = (j * Math.PI * 2) / 6 - Math.PI / 2;
+      pts.push(`${hx + Math.cos(ha) * 8},${hy + Math.sin(ha) * 8}`);
+    }
+    hexagons.push(pts.join(' '));
+  }
+  const outerHex: string[] = [];
+  for (let j = 0; j < 6; j++) {
+    const a = (j * Math.PI * 2) / 6 - Math.PI / 2;
+    outerHex.push(`${cx + Math.cos(a) * 47},${cy + Math.sin(a) * 47}`);
+  }
+  const innerHex: string[] = [];
+  for (let j = 0; j < 6; j++) {
+    const a = (j * Math.PI * 2) / 6 - Math.PI / 2;
+    innerHex.push(`${cx + Math.cos(a) * 26},${cy + Math.sin(a) * 26}`);
+  }
+  return (
+    <g>
+      <polygon points={outerHex.join(' ')} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
+      {hexagons.map((pts, i) => (
+        <polygon key={i} points={pts} fill="none" stroke={color} strokeWidth={1.2} strokeLinejoin="round" opacity={0.85} />
+      ))}
+      {/* 12시 뱀 — S커브 + 혀 */}
+      <path d="M 50 6 Q 46 11 50 14 Q 54 17 50 22" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <path d="M 50 4 L 48.5 1 M 50 4 L 51.5 1" stroke={color} strokeWidth={1} strokeLinecap="round" />
+      <polygon points={innerHex.join(' ')} fill="none" stroke={color} strokeWidth={1.4} />
+    </g>
+  );
+}
+
+function Crest({ suit, size }: { suit: Suit; size: number }) {
+  const { color } = SUIT[suit];
+  const inner =
+    suit === 'sun'   ? <CrestJujak color={color} /> :
+    suit === 'moon'  ? <CrestCheongryong color={color} /> :
+    suit === 'star'  ? <CrestBaekho color={color} /> :
+                       <CrestHyunmu color={color} />;
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: 'block' }}>
+      <circle cx={50} cy={50} r={28} fill={color} opacity={0.05} />
+      {inner}
+    </svg>
+  );
+}
 
 interface TileProps {
   tile: TileType;
@@ -39,224 +181,124 @@ interface TileProps {
 export function Tile({ tile, isSelected, onClick, disabled, size = 'md' }: TileProps) {
   const s = SUIT[tile.suit as Suit];
   const d = SIZE[size];
-  const totalW = d.w + d.dx;
-  const totalH = d.h + d.dy;
-  const liftY  = isSelected ? -18 : 0;
-
-  // clip-path 좌표는 모두 px 정수값 (선명도 유지)
-  // 윗면 parallelogram: (0,dy) → (w,dy) → (w+dx,0) → (dx,0)
-  const topPath = `polygon(0 ${d.dy}px, ${d.w}px ${d.dy}px, ${totalW}px 0px, ${d.dx}px 0px)`;
-
-  // 오른쪽 측면 parallelogram (div는 left=w에서 시작):
-  // 컨테이너 기준 (w,dy)→(w+dx,0)→(w+dx,h)→(w,h+dy)
-  // div 내부 상대 좌표: (0,dy)→(dx,0)→(dx,h)→(0,h+dy)
-  const rightPath = `polygon(0px ${d.dy}px, ${d.dx}px 0px, ${d.dx}px ${d.h}px, 0px ${totalH}px)`;
+  const liftY = isSelected ? -Math.round(d.h * 0.18) : 0;
+  const isClickable = !!onClick && !disabled;
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={`${s.name} ${tile.number}`}
+      className={`fgg-tile${isSelected ? ' is-selected' : ''}${isClickable ? ' is-clickable' : ''}`}
       style={{
-        width: totalW,
-        height: totalH,
-        position: 'relative',
-        flexShrink: 0,
+        width: d.w,
+        height: d.h,
+        borderRadius: d.radius,
         transform: `translateY(${liftY}px)`,
-        transition: 'transform 0.12s ease',
         cursor: disabled ? 'default' : 'pointer',
+        background:
+          'linear-gradient(180deg, #FFFDF4 0%, #FAF1D6 6%, #F4E6C0 18%, #F4E6C0 82%, #E2CC95 96%, #C8AC72 100%), #F4E6C0',
       }}
     >
-      {/* ── 윗면 (Top face) ─────────────────── */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0,
-        width: totalW,
-        height: d.dy,
-        background: `linear-gradient(to bottom, ${TOP} 0%, ${TOP_EDGE} 100%)`,
-        clipPath: topPath,
-        zIndex: 1,
-      }} />
-
-      {/* ── 오른쪽 측면 (Right face) ─────────── */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: d.w,
-        width: d.dx,
-        height: totalH,
-        background: `linear-gradient(to right, ${RIGHT} 0%, ${RIGHT_DARK} 100%)`,
-        clipPath: rightPath,
-        zIndex: 1,
-      }} />
-
-      {/* ── 앞면 (Front face) — 버튼 ─────────── */}
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        aria-label={`${tile.suit} ${tile.number}`}
+      <span
         style={{
           position: 'absolute',
-          top: d.dy,
-          left: 0,
-          width: d.w,
-          height: d.h,
-          padding: 0,
-          background: isSelected
-            ? `linear-gradient(160deg, ${FACE_SEL} 0%, #e8dab8 100%)`
-            : `linear-gradient(160deg, ${FACE} 0%, #e4d8b4 100%)`,
-          border: isSelected
-            ? `2px solid ${s.color}cc`
-            : '1.5px solid #9a8060',
-          borderRadius: '2px 2px 2px 2px',
-          boxShadow: isSelected
-            ? `0 6px 20px rgba(0,0,0,0.35), inset 0 0 10px ${s.color}18`
-            : `0 2px 8px rgba(0,0,0,0.25)`,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1,
-          overflow: 'hidden',
-          cursor: disabled ? 'default' : 'pointer',
-          zIndex: 2,
+          top: 0, left: '4%', right: '4%',
+          height: 4,
+          background: 'linear-gradient(180deg, rgba(255,253,240,0.95) 0%, rgba(255,253,240,0) 100%)',
+          pointerEvents: 'none',
+          zIndex: 4,
+          borderRadius: 'inherit',
         }}
-      >
-        {/* 상단 광택 (마작패 표면 광택) */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '30%',
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, transparent 100%)',
-          borderRadius: '2px 2px 0 0',
-          pointerEvents: 'none',
-        }} />
+      />
 
-        {/* 내부 테두리 프레임 (마작패 특유 이중 테두리) */}
-        <div style={{
-          position: 'absolute',
-          inset: d.corner - 2,
-          border: `1px solid ${isSelected ? s.color + '60' : 'rgba(140,110,60,0.35)'}`,
-          borderRadius: 1,
-          pointerEvents: 'none',
-        }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1,
+      }}>
+        <div style={{ position: 'relative', width: d.crest, height: d.crest }}>
+          <Crest suit={tile.suit as Suit} size={d.crest} />
+          <span style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'Cormorant Garamond, "Noto Serif KR", Georgia, serif',
+            fontWeight: 800,
+            fontSize: d.num,
+            lineHeight: 1,
+            color: s.color,
+            textShadow: '0 1px 0 rgba(255, 250, 230, 0.7)',
+            letterSpacing: '-0.03em',
+          }}>
+            {tile.number}
+          </span>
+        </div>
+      </div>
 
-        {/* 좌상단 숫자 */}
-        <span style={{
-          position: 'absolute',
-          top: 4, left: 5,
-          fontSize: d.corner,
-          fontWeight: 900,
-          lineHeight: 1,
-          color: s.color,
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          userSelect: 'none',
-        }}>
-          {tile.number}
-        </span>
+      <span style={{
+        position: 'absolute',
+        right: Math.max(2, d.w * 0.08),
+        bottom: Math.max(2, d.h * 0.05),
+        zIndex: 2,
+        opacity: 0.85,
+      }}>
+        <Crest suit={tile.suit as Suit} size={d.corner} />
+      </span>
 
-        {/* 중앙 문양 */}
-        <span style={{
-          fontSize: d.sym,
-          lineHeight: 1,
-          color: s.color,
-          textShadow: `1px 2px 0 ${s.shadow}, 0 0 1px ${s.shadow}40`,
-          fontFamily: 'Arial, sans-serif',
-          userSelect: 'none',
-          marginBottom: 1,
-        }}>
-          {s.symbol}
-        </span>
-
-        {/* 중앙 숫자 */}
-        <span style={{
-          fontSize: d.num,
-          fontWeight: 900,
-          lineHeight: 1,
-          color: s.color,
-          textShadow: `1px 1px 0 ${s.shadow}`,
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          letterSpacing: '-0.5px',
-          userSelect: 'none',
-        }}>
-          {tile.number}
-        </span>
-
-        {/* 우하단 숫자 (180도 회전) */}
-        <span style={{
-          position: 'absolute',
-          bottom: 4, right: 5,
-          fontSize: d.corner,
-          fontWeight: 900,
-          lineHeight: 1,
-          color: s.color,
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          transform: 'rotate(180deg)',
-          userSelect: 'none',
-        }}>
-          {tile.number}
-        </span>
-      </button>
-    </div>
+      <span style={{
+        position: 'absolute', inset: 0,
+        border: '1px solid rgba(140, 110, 60, 0.35)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,250,230,0.5)',
+        pointerEvents: 'none',
+        borderRadius: 'inherit',
+        zIndex: 5,
+      }} />
+    </button>
   );
 }
 
 export function TileBack({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const d = SIZE[size];
-  const totalW = d.w + d.dx;
-  const totalH = d.h + d.dy;
-
-  const topPath   = `polygon(0 ${d.dy}px, ${d.w}px ${d.dy}px, ${totalW}px 0px, ${d.dx}px 0px)`;
-  const rightPath = `polygon(0px ${d.dy}px, ${d.dx}px 0px, ${d.dx}px ${d.h}px, 0px ${totalH}px)`;
-
   return (
-    <div style={{ width: totalW, height: totalH, position: 'relative', flexShrink: 0 }}>
-      {/* 윗면 */}
+    <div
+      className="fgg-tile fgg-tile--back"
+      style={{
+        width: d.w,
+        height: d.h,
+        borderRadius: d.radius,
+        position: 'relative',
+        flexShrink: 0,
+      }}
+    >
       <div style={{
-        position: 'absolute', top: 0, left: 0,
-        width: totalW, height: d.dy,
-        background: 'linear-gradient(to bottom, #2a4820, #1a3014)',
-        clipPath: topPath,
+        position: 'absolute', inset: 0,
+        background:
+          'radial-gradient(ellipse 120% 60% at 50% -10%, rgba(255,250,225,0.5) 0%, transparent 55%), linear-gradient(180deg, #FBF2DC 0%, #F4E6C2 55%, #E8D4A2 100%)',
+        boxShadow:
+          'inset 0 0 0 1px rgba(140, 110, 60, 0.25), inset 0 1px 2px rgba(255,250,235,0.7), inset 0 -2px 3px rgba(140, 110, 60, 0.2)',
+        borderRadius: 'inherit',
         zIndex: 1,
       }} />
-
-      {/* 오른쪽 측면 */}
       <div style={{
-        position: 'absolute', top: 0, left: d.w,
-        width: d.dx, height: totalH,
-        background: 'linear-gradient(to right, #1a3014, #0f2009)',
-        clipPath: rightPath,
-        zIndex: 1,
-      }} />
-
-      {/* 뒷면 */}
-      <div style={{
-        position: 'absolute',
-        top: d.dy, left: 0,
-        width: d.w, height: d.h,
-        background: 'linear-gradient(160deg, #1e3a14 0%, #0f2009 100%)',
-        border: '1.5px solid #2d5a1e',
-        borderRadius: 2,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-        overflow: 'hidden',
+        position: 'absolute', inset: '16%',
+        border: '1px solid rgba(140, 110, 60, 0.3)',
+        borderRadius: 3,
+        backgroundImage: 'repeating-linear-gradient(45deg, rgba(140,110,60,0.07) 0 1px, transparent 1px 6px)',
         zIndex: 2,
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 3,
       }}>
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '30%',
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent)',
-          borderRadius: '2px 2px 0 0',
-        }} />
-        <div style={{
-          position: 'absolute', inset: d.corner - 2,
-          border: '1px solid rgba(100,200,80,0.2)',
-          borderRadius: 1,
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span style={{
-            fontSize: d.w * 0.3,
-            fontWeight: 900,
-            color: 'rgba(120,230,90,0.3)',
-            fontFamily: 'Georgia, serif',
-          }}>L</span>
-        </div>
+        <span style={{
+          fontFamily: 'Cormorant Garamond, Georgia, serif',
+          fontSize: d.w * 0.32,
+          fontWeight: 600,
+          color: 'rgba(140, 110, 60, 0.55)',
+          letterSpacing: '0.02em',
+        }}>F</span>
       </div>
     </div>
   );

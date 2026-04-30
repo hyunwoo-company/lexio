@@ -1,22 +1,22 @@
 import type { Player, ChipExchange, RoundResult } from './types';
 
-// 숫자 2 타일 개수에 따른 페널티 배율 계산 (2^n)
-function getPenaltyMultiplier(twoCount: number): number {
-  return Math.pow(2, twoCount);
+// FGG: 숫자 1 (최강 ace) 타일 개수에 따른 페널티 배율 계산 (2^n)
+function getPenaltyMultiplier(oneCount: number): number {
+  return Math.pow(2, oneCount);
 }
 
 // 각 플레이어의 페널티 적용 타일 수 계산
 function getEffectiveTileCount(player: Player): number {
-  const twoCount = player.hand.filter((t) => t.number === 2).length;
-  if (twoCount === 0) return player.hand.length;
-  return player.hand.length * getPenaltyMultiplier(twoCount);
+  const oneCount = player.hand.filter((t) => t.number === 1).length;
+  if (oneCount === 0) return player.hand.length;
+  return player.hand.length * getPenaltyMultiplier(oneCount);
 }
 
 export function calculateScoring(players: Player[]): RoundResult {
   const effectiveCounts = players.map((p) => ({
     playerId: p.id,
     tileCount: getEffectiveTileCount(p),
-    penaltyMultiplier: getPenaltyMultiplier(p.hand.filter((t) => t.number === 2).length),
+    penaltyMultiplier: getPenaltyMultiplier(p.hand.filter((t) => t.number === 1).length),
   }));
 
   const exchanges: ChipExchange[] = [];

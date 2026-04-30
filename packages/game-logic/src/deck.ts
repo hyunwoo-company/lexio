@@ -28,10 +28,10 @@ export function dealTiles(deck: Tile[], config: GameConfig): Tile[][] {
   return hands;
 }
 
-// 구름3 보유자 인덱스 반환
+// FGG: 현무2(cloud-2, 최약 타일) 보유자 인덱스 반환
 export function findFirstPlayer(hands: Tile[][]): number {
   for (let i = 0; i < hands.length; i++) {
-    if (hands[i].some((t) => t.suit === 'cloud' && t.number === 3)) return i;
+    if (hands[i].some((t) => t.suit === 'cloud' && t.number === 2)) return i;
   }
   return 0;
 }

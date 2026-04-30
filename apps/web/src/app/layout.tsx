@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'LEXIO',
-  description: '렉시오 온라인 보드게임',
+  title: 'FGG — Four Guardian Gods',
+  description: '사신수 타일 × 포커 족보 클라이밍 온라인 보드게임',
 };
 
 export const viewport: Viewport = {

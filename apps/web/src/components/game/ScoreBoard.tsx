@@ -17,7 +17,7 @@ export function ScoreBoard({ gameState, roundResult, onReady }: ScoreBoardProps)
 
       {roundResult.penalizedPlayers.length > 0 && (
         <div className="w-full">
-          <h3 className="text-sm text-red-400 font-semibold mb-2">페널티 (숫자 2 보유)</h3>
+          <h3 className="text-sm text-red-400 font-semibold mb-2">페널티 (숫자 1 보유)</h3>
           <ul className="space-y-1">
             {roundResult.penalizedPlayers.map((p) => (
               <li key={p.playerId} className="text-sm text-red-300">
@@ -55,7 +55,7 @@ export function ScoreBoard({ gameState, roundResult, onReady }: ScoreBoardProps)
             .map((p) => (
               <li key={p.id} className="flex justify-between text-sm">
                 <span>{p.name}</span>
-                <span className="font-bold text-yellow-400">{p.chips}점</span>
+                <span className="font-bold" style={{ color: '#F2C878' }}>{p.chips}점</span>
               </li>
             ))}
         </ul>

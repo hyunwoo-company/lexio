@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ghcr.io/hyunwoo-company/lexio-server
+  IMAGE_NAME: ghcr.io/hyunwoo-company/fgg-server
 
 jobs:
   build-and-push:

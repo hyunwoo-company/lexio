@@ -16,44 +16,72 @@ export function OpponentArea({ player, isCurrentTurn }: OpponentAreaProps) {
         flexDirection: 'column',
         alignItems: 'center',
         gap: 4,
-        padding: '6px 8px',
+        padding: '8px 12px',
         borderRadius: 12,
-        background: isCurrentTurn ? 'rgba(250,204,21,0.12)' : 'rgba(0,0,0,0.15)',
-        border: isCurrentTurn ? '1.5px solid rgba(250,204,21,0.5)' : '1.5px solid transparent',
+        background: isCurrentTurn ? 'rgba(212,166,86,0.12)' : 'rgba(0,0,0,0.25)',
+        border: isCurrentTurn ? '1.5px solid var(--fgg-gold)' : '1.5px solid var(--fgg-line)',
+        boxShadow: isCurrentTurn ? '0 0 18px rgba(212,166,86,0.25)' : 'none',
         transition: 'all 0.2s ease',
-        minWidth: 60,
+        minWidth: 90,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <span style={{
-          fontSize: 12,
-          fontWeight: 700,
-          color: isCurrentTurn ? '#fcd34d' : '#cbd5e1',
-          maxWidth: 70,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: 'var(--fgg-font-display, Georgia, serif)',
+            color: isCurrentTurn ? 'var(--fgg-gold-bright)' : 'var(--fgg-text-dim)',
+            maxWidth: 80,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {player.name}
         </span>
         {isCurrentTurn && (
-          <span style={{ fontSize: 10, color: '#fbbf24', animation: 'pulse 1s infinite' }}>▲</span>
+          <span style={{ fontSize: 10, color: 'var(--fgg-gold)', animation: 'pulse 1s infinite' }}>▲</span>
         )}
       </div>
-      <span style={{ fontSize: 10, color: '#64748b' }}>칩: {player.chips}</span>
 
-      {/* 타일 패 (쌓인 형태로 표시) */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center', maxWidth: 120 }}>
-        {Array.from({ length: Math.min(player.handCount, 9) }).map((_, i) => (
-          <TileBack key={i} size="sm" />
-        ))}
-        {player.handCount > 9 && (
-          <span style={{ fontSize: 10, color: '#94a3b8', alignSelf: 'center' }}>+{player.handCount - 9}</span>
-        )}
-      </div>
-      {player.handCount === 0 && (
+      <span style={{ fontSize: 10, color: 'var(--fgg-text-muted)' }}>
+        💰 {player.chips}
+      </span>
+
+      {/* 컴팩트 뷰: 패뒷면 1장 + 개수 표시 */}
+      {player.handCount > 0 ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '4px 8px',
+            borderRadius: 8,
+            background: 'rgba(0,0,0,0.3)',
+            border: '1px solid var(--fgg-line)',
+          }}
+        >
+          <div style={{ position: 'relative', width: 22, height: 32 }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, transform: 'rotate(-4deg)' }}>
+              <TileBack size="sm" />
+            </div>
+          </div>
+          <span
+            style={{
+              fontSize: 14,
+              fontWeight: 700,
+              color: 'var(--fgg-text)',
+              fontFamily: 'var(--fgg-font-num, Georgia, serif)',
+            }}
+          >
+            ×{player.handCount}
+          </span>
+        </div>
+      ) : (
         <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 700 }}>완료!</span>
       )}
+
       {!player.isConnected && (
         <span style={{ fontSize: 10, color: '#ef4444' }}>연결 끊김</span>
       )}

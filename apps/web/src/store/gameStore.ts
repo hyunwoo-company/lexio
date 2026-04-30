@@ -25,6 +25,7 @@ interface GameStore {
   setGameState: (state: ClientGameState) => void;
   setRoundResult: (result: RoundResult) => void;
   toggleTile: (tileId: string) => void;
+  selectTiles: (tileIds: string[]) => void;
   clearSelection: () => void;
   setError: (msg: string | null) => void;
   reset: () => void;
@@ -50,6 +51,7 @@ export const useGameStore = create<GameStore>((set) => ({
         ? s.selectedTileIds.filter((id) => id !== tileId)
         : [...s.selectedTileIds, tileId],
     })),
+  selectTiles: (tileIds) => set({ selectedTileIds: tileIds }),
   clearSelection: () => set({ selectedTileIds: [] }),
   setError: (msg) => set({ error: msg }),
   reset: () =>

@@ -82,9 +82,6 @@ function isFlush(tiles: Tile[]): boolean {
 }
 
 function isStraight(tiles: Tile[], maxNumber: TileNumber): boolean {
-  // 2는 스트레이트에 포함 불가
-  if (tiles.some((t) => t.number === 2)) return false;
-
   const sorted = sortByStraightOrder(tiles, maxNumber);
   if (!sorted) return false;
 
@@ -94,14 +91,13 @@ function isStraight(tiles: Tile[], maxNumber: TileNumber): boolean {
   return true;
 }
 
-// 스트레이트 정렬: 1은 maxNumber 다음으로 처리
+// FGG 스트레이트 정렬: 1은 maxNumber 다음 (ace high)로 처리
+// 2는 일반 최저값으로 처리 (e.g., 2-3-4-5-6 가능)
+// 1과 2가 모두 있으면 invalid (1은 ace, 2는 low — 한 스트레이트에 못 섞임)
 // 반환: 정렬된 서열 배열, 유효하지 않으면 null
 function sortByStraightOrder(tiles: Tile[], maxNumber: TileNumber): number[] | null {
   const numbers = tiles.map((t) => t.number);
   const has1 = numbers.includes(1);
-  const has2 = numbers.includes(2);
-
-  if (has2) return null;
 
   if (has1) {
     // 1이 있으면: 나머지 4개가 maxNumber-3 ~ maxNumber 연속이어야 함

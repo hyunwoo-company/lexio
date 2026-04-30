@@ -55,22 +55,27 @@ export function GameBoard() {
 
   return (
     <div
+      className="fgg-felt"
       style={{
         minHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
-        background: 'radial-gradient(ellipse at center, #0e3b1f 0%, #071810 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* 테이블 테두리 느낌 */}
+      {/* 비네트 + 황동 테이블 림 */}
       <div style={{
         position: 'absolute', inset: 0,
-        border: '8px solid #3d1a00',
-        borderRadius: 0,
+        background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)',
         pointerEvents: 'none',
-        boxShadow: 'inset 0 0 40px rgba(0,0,0,0.5)',
+        zIndex: 1,
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        border: '6px solid #2A1F0F',
+        boxShadow: 'inset 0 0 0 1px var(--fgg-line-strong), inset 0 0 60px rgba(0,0,0,0.45)',
+        pointerEvents: 'none',
         zIndex: 10,
       }} />
 

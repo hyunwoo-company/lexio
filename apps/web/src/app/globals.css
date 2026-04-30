@@ -2,31 +2,178 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== FGG Design System — Premium Dark / Casino Poker Room ===== */
+:root {
+  /* 사신수 컬러 (suit) */
+  --fgg-jujak:        #C8323D;  /* 주작 / sun  */
+  --fgg-cheongryong:  #2A8C56;  /* 청룡 / moon */
+  --fgg-baekho:       #D88438;  /* 백호 / star */
+  --fgg-hyunmu:       #3A5A8C;  /* 현무 / cloud */
+
+  /* 브랜드 골드 */
+  --fgg-gold:         #D4A656;
+  --fgg-gold-bright:  #F2C878;
+  --fgg-gold-deep:    #8C6A2A;
+
+  /* 배경 / felt */
+  --fgg-bg-0:    #0A0F0D;
+  --fgg-bg-1:    #11181A;
+  --fgg-bg-2:    #1A2326;
+  --fgg-felt-0:  #0E3A2C;
+  --fgg-felt-1:  #134A38;
+  --fgg-felt-2:  #1E5C46;
+
+  /* 텍스트 */
+  --fgg-text:       #F2EAD3;
+  --fgg-text-dim:   #B7AC8E;
+  --fgg-text-muted: #6F6650;
+
+  /* 라인 */
+  --fgg-line:        rgba(212, 166, 86, 0.18);
+  --fgg-line-strong: rgba(212, 166, 86, 0.35);
+
+  /* 타이포 */
+  --fgg-font-display: 'Cormorant Garamond', 'Noto Serif KR', Georgia, serif;
+  --fgg-font-num:     'Cormorant Garamond', 'Noto Serif KR', Georgia, serif;
+}
+
 body {
   @apply bg-gray-950 text-white;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  background: var(--fgg-bg-0);
+  color: var(--fgg-text);
 }
 
 * {
   -webkit-overflow-scrolling: touch;
 }
 
-/* 가로 스크롤 바 숨김 */
 ::-webkit-scrollbar {
   height: 4px;
   width: 4px;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
+  background: rgba(212,166,86,0.2);
   border-radius: 2px;
 }
+::-webkit-scrollbar-thumb:hover { background: rgba(212,166,86,0.4); }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+/* ===== FGG 타일 — 마작패 스타일 (아이보리 본체 + 그림자) ===== */
+.fgg-tile {
+  position: relative;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  /* side-edge 그림자 + 베이스 stack + 긴 ground shadow */
+  box-shadow:
+    inset 2px 0 4px -1px rgba(140, 110, 60, 0.18),
+    inset -2px 0 4px -1px rgba(140, 110, 60, 0.22),
+    inset 0 -3px 5px -1px rgba(120, 90, 40, 0.32),
+    inset 0 1px 0 rgba(255, 252, 240, 0.9),
+    0 1px 0 #C9B07F,
+    0 3px 0 #A88E5E,
+    0 5px 0 #806B45,
+    0 12px 14px -2px rgba(0,0,0,0.45),
+    0 22px 28px -6px rgba(0,0,0,0.5),
+    0 4px 8px rgba(0,0,0,0.3);
+  transition: transform 160ms cubic-bezier(.2,.8,.2,1), box-shadow 160ms;
+}
+
+.fgg-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 35% at 32% 18%, rgba(255,255,255,0.45) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 20% at 75% 12%, rgba(255,255,255,0.25) 0%, transparent 65%),
+    linear-gradient(180deg, transparent 0%, transparent 70%, rgba(140, 110, 60, 0.08) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fgg-tile.is-clickable:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 2px 0 4px -1px rgba(140, 110, 60, 0.18),
+    inset -2px 0 4px -1px rgba(140, 110, 60, 0.22),
+    inset 0 -3px 5px -1px rgba(120, 90, 40, 0.32),
+    inset 0 1px 0 rgba(255, 252, 240, 0.9),
+    0 1px 0 #C9B07F,
+    0 3px 0 #A88E5E,
+    0 5px 0 #806B45,
+    0 18px 18px -2px rgba(0,0,0,0.5),
+    0 28px 32px -6px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(212, 166, 86, 0.5);
+}
+
+.fgg-tile.is-selected {
+  box-shadow:
+    inset 2px 0 4px -1px rgba(140, 110, 60, 0.18),
+    inset -2px 0 4px -1px rgba(140, 110, 60, 0.22),
+    inset 0 -3px 5px -1px rgba(120, 90, 40, 0.32),
+    inset 0 1px 0 rgba(255, 252, 240, 0.9),
+    0 1px 0 #C9B07F,
+    0 3px 0 #A88E5E,
+    0 5px 0 #806B45,
+    0 22px 24px -2px rgba(0,0,0,0.55),
+    0 32px 38px -6px rgba(0,0,0,0.6),
+    0 0 0 2px var(--fgg-gold),
+    0 0 22px rgba(242, 200, 120, 0.55);
+}
+
+/* 뒷면: 아이보리 + 옅은 빗금 (펠트 위에 사라지지 않도록) */
+.fgg-tile--back {
+  background: transparent;
+  box-shadow:
+    0 1px 0 -0px #DCC79A,
+    0 3px 0 -1px #C9B07F,
+    0 5px 0 -2px #A88E5E,
+    0 7px 0 -3px #806B45,
+    0 14px 18px -4px rgba(0,0,0,0.5),
+    0 4px 8px rgba(0,0,0,0.32);
+}
+.fgg-tile--back::before { display: none; }
+
+/* ===== 펠트 테이블 ===== */
+.fgg-felt {
+  background:
+    radial-gradient(ellipse at center, var(--fgg-felt-2) 0%, var(--fgg-felt-1) 50%, var(--fgg-felt-0) 100%),
+    var(--fgg-felt-0);
+  position: relative;
+}
+.fgg-felt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-radial-gradient(circle at 30% 40%, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px),
+    repeating-radial-gradient(circle at 70% 60%, rgba(0,0,0,0.04) 0 1px, transparent 1px 4px);
+  pointer-events: none;
+}
+
+/* ===== 골드 칩 ===== */
+.fgg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(212, 166, 86, 0.1);
+  border: 1px solid var(--fgg-line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fgg-gold-bright);
+  font-family: var(--fgg-font-num);
 }

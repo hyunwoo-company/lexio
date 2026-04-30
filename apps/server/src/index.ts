@@ -34,5 +34,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT ?? 3001;
 httpServer.listen(PORT, () => {
-  console.log(`렉시오 서버 실행 중: http://localhost:${PORT}`);
+  console.log(`FGG 서버 실행 중: http://localhost:${PORT}`);
 });

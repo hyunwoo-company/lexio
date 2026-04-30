@@ -108,8 +108,8 @@ export function LobbyScreen() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center gap-8 p-6">
       <div className="text-center">
-        <h1 className="text-6xl font-black tracking-tight text-white mb-2">LEXIO</h1>
-        <p className="text-gray-400">마작 타일 × 포커 족보 클라이밍 게임</p>
+        <h1 className="text-6xl font-black tracking-tight mb-2" style={{ color: 'var(--fgg-gold, #D4A656)' }}>FGG</h1>
+        <p className="text-gray-400">사신수 타일 × 포커 족보 클라이밍 게임</p>
       </div>
 
       <div className="bg-gray-800 rounded-2xl p-8 w-full max-w-sm flex flex-col gap-5">

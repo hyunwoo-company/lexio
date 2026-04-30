@@ -31,7 +31,7 @@ export function CenterPlay({ lastPlay, lastPlayerId, playerNames, currentPlayerN
       {/* 현재 차례 표시 */}
       <div style={{
         background: 'rgba(0,0,0,0.3)',
-        border: '1px solid rgba(250,204,21,0.3)',
+        border: '1px solid var(--fgg-line-strong, rgba(212,166,86,0.4))',
         borderRadius: 20,
         padding: '4px 14px',
         fontSize: 13,
@@ -56,11 +56,11 @@ export function CenterPlay({ lastPlay, lastPlayerId, playerNames, currentPlayerN
             </span>
             <span>—</span>
             <span style={{
-              background: 'rgba(139,92,246,0.2)',
-              border: '1px solid rgba(139,92,246,0.3)',
+              background: 'rgba(212,166,86,0.15)',
+              border: '1px solid rgba(212,166,86,0.4)',
               borderRadius: 6,
               padding: '1px 7px',
-              color: '#c4b5fd',
+              color: '#F2C878',
               fontWeight: 700,
               fontSize: 10,
             }}>

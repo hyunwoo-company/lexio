@@ -1,6 +1,6 @@
 import { detectCombination } from '../src/validator';
 import { canPlay } from '../src/canPlay';
-import type { Tile, TileNumber } from '../src/types';
+import type { Tile } from '../src/types';
 
 const tile = (number: number, suit: string): Tile =>
   ({ id: `${suit}-${number}`, number, suit } as Tile);
@@ -40,37 +40,41 @@ describe('detectCombination', () => {
     });
   });
 
-  describe('스트레이트 (straight)', () => {
+  describe('스트레이트 (straight) — FGG: 1만 ace high, 2는 일반 최저', () => {
     it('5개 연속 숫자는 straight', () => {
       const tiles = [tile(4, 'sun'), tile(5, 'moon'), tile(6, 'star'), tile(7, 'cloud'), tile(8, 'sun')];
       const result = detectCombination(tiles);
       expect(result?.type).toBe('straight');
     });
 
-    it('2가 포함된 조합은 straight 불가', () => {
+    it('FGG: [2,3,4,5,6]은 valid straight (2가 최저)', () => {
+      const tiles = [tile(2, 'sun'), tile(3, 'moon'), tile(4, 'star'), tile(5, 'cloud'), tile(6, 'sun')];
+      const result = detectCombination(tiles);
+      expect(result?.type).toBe('straight');
+    });
+
+    it('FGG: 1과 2가 함께 있는 [1,2,3,4,5]는 invalid', () => {
       const tiles = [tile(1, 'sun'), tile(2, 'moon'), tile(3, 'star'), tile(4, 'cloud'), tile(5, 'sun')];
       const result = detectCombination(tiles);
       expect(result?.type).not.toBe('straight');
       expect(result?.type).not.toBe('straightflush');
     });
 
-    it('4인 플레이(maxNumber=13): [10,11,12,13,1]은 유효한 straight', () => {
+    it('4인 플레이(maxNumber=13): [10,11,12,13,1]은 valid straight (1이 ace high)', () => {
       const tiles = [tile(10, 'sun'), tile(11, 'moon'), tile(12, 'star'), tile(13, 'cloud'), tile(1, 'sun')];
       const result = detectCombination(tiles, 13);
       expect(result?.type).toBe('straight');
     });
 
-    it('3인 플레이(maxNumber=9): [6,7,8,9,1]은 유효한 straight', () => {
+    it('3인 플레이(maxNumber=9): [6,7,8,9,1]은 valid straight', () => {
       const tiles = [tile(6, 'sun'), tile(7, 'moon'), tile(8, 'star'), tile(9, 'cloud'), tile(1, 'sun')];
       const result = detectCombination(tiles, 9);
       expect(result?.type).toBe('straight');
     });
 
-    it('3인 플레이(maxNumber=9): [7,8,9,10,1]은 invalid (10이 범위 밖이지만 타입 허용 케이스 확인)', () => {
-      // 9가 maxNumber이므로 9,10,11... 연속은 invalid (10이 범위 밖)
-      // 여기서는 maxNumber=9로 검사, [5,6,7,8,9]는 valid
-      const tiles = [tile(5, 'sun'), tile(6, 'moon'), tile(7, 'star'), tile(8, 'cloud'), tile(9, 'sun')];
-      const result = detectCombination(tiles, 9);
+    it('5인 플레이(maxNumber=15): [12,13,14,15,1]은 valid straight (최강)', () => {
+      const tiles = [tile(12, 'sun'), tile(13, 'moon'), tile(14, 'star'), tile(15, 'cloud'), tile(1, 'sun')];
+      const result = detectCombination(tiles, 15);
       expect(result?.type).toBe('straight');
     });
   });
@@ -142,10 +146,17 @@ describe('canPlay', () => {
     expect(canPlay(straight, flush)).toBe(false);
   });
 
-  it('같은 페어 숫자면 해 포함된 쪽이 이김', () => {
+  it('같은 페어 숫자면 주작 포함된 쪽이 이김', () => {
     const withSun = detectCombination([tile(7, 'sun'), tile(7, 'moon')])!;
     const withoutSun = detectCombination([tile(7, 'star'), tile(7, 'cloud')])!;
     expect(canPlay(withSun, withoutSun)).toBe(true);
     expect(canPlay(withoutSun, withSun)).toBe(false);
+  });
+
+  it('FGG: 단수 1이 단수 15보다 강함', () => {
+    const one = detectCombination([tile(1, 'cloud')])!;
+    const fifteen = detectCombination([tile(15, 'sun')])!;
+    expect(canPlay(one, fifteen)).toBe(true);
+    expect(canPlay(fifteen, one)).toBe(false);
   });
 });

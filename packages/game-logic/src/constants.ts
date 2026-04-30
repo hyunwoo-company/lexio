@@ -1,13 +1,15 @@
 import type { TileNumber, Suit, CombinationType, GameConfig, PlayerCount } from './types';
 
-// 숫자 서열: 2가 최강(14), 3이 최약(0)
+// FGG 숫자 서열: 1이 최강(14, ace high), 2가 최약(0)
+// 1 > 15 > 14 > ... > 4 > 3 > 2
 export const NUMBER_RANK: Record<TileNumber, number> = {
-  3: 0, 4: 1, 5: 2, 6: 3, 7: 4, 8: 5, 9: 6,
-  10: 7, 11: 8, 12: 9, 13: 10, 14: 11, 15: 12,
-  1: 13, 2: 14,
+  2: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7,
+  10: 8, 11: 9, 12: 10, 13: 11, 14: 12, 15: 13,
+  1: 14,
 };
 
-// 문양 서열: 해가 최강(3), 구름이 최약(0)
+// 문양 서열: 주작(sun)이 최강(3), 현무(cloud)가 최약(0)
+// sun=주작, moon=청룡, star=백호, cloud=현무
 export const SUIT_RANK: Record<Suit, number> = {
   cloud: 0,
   star: 1,
@@ -36,9 +38,10 @@ export const GAME_CONFIG: Record<PlayerCount, GameConfig> = {
 
 export const ALL_SUITS: Suit[] = ['sun', 'moon', 'star', 'cloud'];
 
+// 사신수 매핑
 export const SUIT_LABEL: Record<Suit, string> = {
-  sun: '해',
-  moon: '달',
-  star: '별',
-  cloud: '구름',
+  sun: '주작',
+  moon: '청룡',
+  star: '백호',
+  cloud: '현무',
 };
