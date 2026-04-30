@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap');
+
 /* ===== FGG Design System — Premium Dark / Casino Poker Room ===== */
 :root {
   /* 사신수 컬러 (suit) */
@@ -161,6 +163,60 @@ body {
     repeating-radial-gradient(circle at 30% 40%, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px),
     repeating-radial-gradient(circle at 70% 60%, rgba(0,0,0,0.04) 0 1px, transparent 1px 4px);
   pointer-events: none;
+}
+
+/* ===== Panel / Card ===== */
+.fgg-panel {
+  background: linear-gradient(180deg, var(--fgg-bg-2) 0%, var(--fgg-bg-1) 100%);
+  border: 1px solid var(--fgg-line);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* ===== Button ===== */
+.fgg-btn {
+  font-weight: 600;
+  border: 1px solid var(--fgg-line-strong);
+  background: linear-gradient(180deg, #2A2520 0%, #181410 100%);
+  color: var(--fgg-text);
+  padding: 12px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 120ms;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.fgg-btn:hover:not(:disabled) {
+  border-color: var(--fgg-gold);
+  color: var(--fgg-gold-bright);
+}
+.fgg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.fgg-btn--primary {
+  background: linear-gradient(180deg, var(--fgg-gold-bright) 0%, var(--fgg-gold) 50%, var(--fgg-gold-deep) 100%);
+  border-color: var(--fgg-gold-deep);
+  color: #1A1408;
+  box-shadow: 0 4px 12px rgba(212, 166, 86, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.fgg-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  color: #1A1408;
+  border-color: var(--fgg-gold-deep);
+}
+
+.fgg-display {
+  font-family: var(--fgg-font-display);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.fgg-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fgg-gold);
 }
 
 /* ===== 골드 칩 ===== */

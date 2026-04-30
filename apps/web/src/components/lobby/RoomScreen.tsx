@@ -10,6 +10,8 @@ interface RoomScreenProps {
   roomId: string;
 }
 
+const MAX_SEATS = 5;
+
 export function RoomScreen({ roomId }: RoomScreenProps) {
   useSocket();
   const { myId, gameState, roomInfo: initialRoomInfo, setRoomInfo, setRoom } = useGameStore();
@@ -68,49 +70,320 @@ export function RoomScreen({ roomId }: RoomScreenProps) {
     return <GameBoard />;
   }
 
-  const isHost = room?.players[0]?.id === myId;
-  const canStart = (room?.playerCount ?? 0) >= 3;
+  const players = room?.players ?? [];
+  const isHost = players[0]?.id === myId;
+  const playerCount = room?.playerCount ?? players.length;
+  const canStart = playerCount >= 3;
+  const emptySeatCount = Math.max(0, MAX_SEATS - playerCount);
+  const emptySeats = Array.from({ length: emptySeatCount });
+
+  const copyRoomCode = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(roomId).catch(() => {});
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center gap-8 p-6">
-      <div className="text-center">
-        <h1 className="text-4xl font-black text-white">LEXIO</h1>
-        <p className="text-gray-400 mt-1">대기실</p>
-      </div>
+    <div
+      style={{
+        minHeight: '100dvh',
+        background: 'var(--fgg-bg-0)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '32px 20px 28px',
+        gap: 28,
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* 골드 비네트 */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'radial-gradient(ellipse at top, rgba(212, 166, 86, 0.10) 0%, transparent 55%)',
+          pointerEvents: 'none',
+        }}
+      />
 
-      <div className="bg-gray-800 rounded-2xl p-8 w-full max-w-sm flex flex-col gap-6">
-        <div>
-          <p className="text-sm text-gray-400 mb-1">방 코드</p>
-          <p className="text-3xl font-black tracking-widest text-blue-400">{roomId}</p>
-          <p className="text-xs text-gray-500 mt-1">친구에게 이 코드를 알려주세요</p>
+      {/* 헤더 */}
+      <header
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: '100%',
+          maxWidth: 880,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 6,
+          textAlign: 'center',
+        }}
+      >
+        <div className="fgg-eyebrow">Waiting Room</div>
+        <h1
+          className="fgg-display"
+          style={{
+            fontSize: 44,
+            margin: 0,
+            color: 'var(--fgg-gold-bright)',
+            letterSpacing: '0.06em',
+            textShadow: '0 0 24px rgba(242, 200, 120, 0.35)',
+          }}
+        >
+          대기실
+        </h1>
+        <p style={{ fontSize: 13, color: 'var(--fgg-text-dim)', margin: 0 }}>
+          사신수 타일 × 포커 족보 클라이밍
+        </p>
+      </header>
+
+      {/* 방 코드 패널 */}
+      <section
+        className="fgg-panel"
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: '100%',
+          maxWidth: 520,
+          padding: '22px 26px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 10,
+        }}
+      >
+        <div className="fgg-eyebrow" style={{ color: 'var(--fgg-gold)' }}>
+          Room Code
+        </div>
+        <div
+          style={{
+            fontFamily: "'JetBrains Mono', 'Menlo', monospace",
+            fontSize: 40,
+            letterSpacing: '0.32em',
+            fontWeight: 700,
+            color: 'var(--fgg-gold-bright)',
+            textShadow: '0 0 18px rgba(242, 200, 120, 0.35)',
+            paddingLeft: '0.32em',
+          }}
+        >
+          {roomId}
+        </div>
+        <button
+          onClick={copyRoomCode}
+          className="fgg-btn"
+          style={{ padding: '6px 14px', fontSize: 12 }}
+        >
+          코드 복사
+        </button>
+      </section>
+
+      {/* 참가자 그리드 */}
+      <section
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: '100%',
+          maxWidth: 880,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+          }}
+        >
+          <div className="fgg-eyebrow">Players</div>
+          <div
+            style={{
+              fontFamily: 'var(--fgg-font-num)',
+              fontSize: 16,
+              color: 'var(--fgg-text-dim)',
+            }}
+          >
+            <span style={{ color: 'var(--fgg-gold-bright)' }}>{playerCount}</span> / {MAX_SEATS}
+          </div>
         </div>
 
-        <div>
-          <p className="text-sm text-gray-400 mb-2">참가자 ({room?.playerCount ?? 0}/5)</p>
-          <ul className="space-y-2">
-            {room?.players.map((p, i) => (
-              <li key={p.id} className="flex items-center gap-2">
-                {i === 0 && <span className="text-xs text-yellow-400">방장</span>}
-                <span className={p.id === myId ? 'font-bold text-white' : 'text-gray-300'}>{p.name}</span>
-              </li>
-            ))}
-          </ul>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 14,
+          }}
+        >
+          {players.map((p, i) => {
+            const isMe = p.id === myId;
+            const host = i === 0;
+            const initial = p.name?.charAt(0) ?? '?';
+
+            return (
+              <div
+                key={p.id}
+                className="fgg-panel"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '20px 16px',
+                  borderColor: isMe ? 'var(--fgg-gold)' : 'var(--fgg-line)',
+                  boxShadow: isMe
+                    ? '0 0 24px rgba(212, 166, 86, 0.25), 0 12px 40px rgba(0,0,0,0.5)'
+                    : undefined,
+                }}
+              >
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #3A2D1A, #1A1408)',
+                    border: `2px solid ${isMe ? 'var(--fgg-gold-bright)' : 'var(--fgg-gold)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: 'var(--fgg-font-display)',
+                    fontWeight: 600,
+                    fontSize: 26,
+                    color: 'var(--fgg-gold-bright)',
+                    boxShadow: '0 0 12px rgba(212, 166, 86, 0.25)',
+                  }}
+                >
+                  {initial}
+                </div>
+
+                <div style={{ textAlign: 'center', minHeight: 38 }}>
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: 'var(--fgg-text)',
+                      marginBottom: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    {p.name}
+                    {host && (
+                      <span style={{ fontSize: 11, color: 'var(--fgg-gold-bright)' }}>
+                        👑 방장
+                      </span>
+                    )}
+                  </div>
+                  {isMe && (
+                    <div style={{ fontSize: 11, color: 'var(--fgg-gold)' }}>(나)</div>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: '4px 14px',
+                    borderRadius: 999,
+                    background: 'rgba(45, 186, 111, 0.15)',
+                    color: '#5DDA9E',
+                    border: '1px solid rgba(45, 186, 111, 0.4)',
+                  }}
+                >
+                  ✓ 입장 완료
+                </div>
+              </div>
+            );
+          })}
+
+          {emptySeats.map((_, i) => (
+            <div
+              key={`empty-${i}`}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                padding: '20px 16px',
+                minHeight: 188,
+                border: '1px dashed rgba(212, 166, 86, 0.25)',
+                borderRadius: 16,
+                background: 'rgba(255, 255, 255, 0.015)',
+              }}
+            >
+              <div style={{ fontSize: 36, color: 'var(--fgg-text-muted)' }}>＋</div>
+              <div style={{ color: 'var(--fgg-text-muted)', fontSize: 12, textAlign: 'center' }}>
+                빈 자리
+                <br />
+                친구 초대
+              </div>
+            </div>
+          ))}
         </div>
 
-        {isHost && (
+        <div
+          style={{
+            fontSize: 12,
+            color: canStart ? 'var(--fgg-text-dim)' : 'var(--fgg-gold)',
+            textAlign: 'center',
+            marginTop: 4,
+            fontStyle: 'italic',
+          }}
+        >
+          {canStart
+            ? `${playerCount}명 입장 · 게임 시작 가능`
+            : `최소 3명 필요 · 현재 ${playerCount}명`}
+        </div>
+      </section>
+
+      {/* 푸터: 시작 버튼 */}
+      <footer
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: '100%',
+          maxWidth: 520,
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: 'auto',
+        }}
+      >
+        {isHost ? (
           <button
             onClick={handleStart}
             disabled={!canStart}
-            className="py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 rounded-xl font-bold transition-colors"
+            className="fgg-btn fgg-btn--primary"
+            style={{
+              padding: '14px 36px',
+              fontSize: 16,
+              letterSpacing: '0.08em',
+              fontFamily: 'var(--fgg-font-display)',
+              minWidth: 240,
+            }}
           >
-            {canStart ? '게임 시작' : `최소 3명 필요 (현재 ${room?.playerCount ?? 0}명)`}
+            {canStart ? '게임 시작 ▸' : '대기 중...'}
           </button>
+        ) : (
+          <p
+            style={{
+              fontSize: 13,
+              color: 'var(--fgg-text-dim)',
+              textAlign: 'center',
+              margin: 0,
+              fontStyle: 'italic',
+            }}
+          >
+            방장이 게임을 시작할 때까지 기다려 주세요
+          </p>
         )}
-
-        {!isHost && (
-          <p className="text-center text-sm text-gray-500">방장이 게임을 시작할 때까지 기다려 주세요</p>
-        )}
-      </div>
+      </footer>
     </div>
   );
 }

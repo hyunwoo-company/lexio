@@ -6,6 +6,32 @@ import { getSocket } from '@/hooks/useSocket';
 import { useGameStore, type RoomInfo } from '@/store/gameStore';
 import { getClientId, saveSession } from '@/lib/clientId';
 
+function LogoMark({ size = 88 }: { size?: number }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: Math.round(size * 0.18),
+        background: 'linear-gradient(135deg, var(--fgg-gold-bright), var(--fgg-gold-deep))',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'var(--fgg-font-display)',
+        fontStyle: 'italic',
+        fontWeight: 600,
+        color: '#1A1408',
+        fontSize: size * 0.55,
+        boxShadow:
+          '0 8px 28px rgba(212, 166, 86, 0.45), inset 0 1px 0 rgba(255,255,255,0.35)',
+        lineHeight: 1,
+      }}
+    >
+      F
+    </div>
+  );
+}
+
 export function LobbyScreen() {
   const nameRef = useRef<HTMLInputElement>(null);
   const joinCodeRef = useRef<HTMLInputElement>(null);
@@ -105,77 +131,204 @@ export function LobbyScreen() {
     socket.emit('room:join', { roomId: joinCode, playerName: name });
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: 'var(--fgg-bg-1)',
+    border: '1px solid var(--fgg-line)',
+    color: 'var(--fgg-text)',
+    padding: '12px 16px',
+    borderRadius: 10,
+    fontSize: 14,
+    fontFamily: 'var(--fgg-font-body, inherit)',
+    outline: 'none',
+    transition: 'border-color 120ms, box-shadow 120ms',
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center gap-8 p-6">
-      <div className="text-center">
-        <h1 className="text-6xl font-black tracking-tight mb-2" style={{ color: 'var(--fgg-gold, #D4A656)' }}>FGG</h1>
-        <p className="text-gray-400">사신수 타일 × 포커 족보 클라이밍 게임</p>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-6"
+      style={{
+        background:
+          'radial-gradient(ellipse at top, rgba(212,166,86,0.06) 0%, transparent 55%), var(--fgg-bg-0)',
+        color: 'var(--fgg-text)',
+      }}
+    >
+      {/* Brand block */}
+      <div className="flex flex-col items-center text-center" style={{ marginBottom: 32 }}>
+        <LogoMark size={88} />
+        <h1
+          className="fgg-display"
+          style={{
+            margin: '20px 0 6px',
+            fontSize: 64,
+            letterSpacing: '0.14em',
+            color: 'var(--fgg-text)',
+            background:
+              'linear-gradient(180deg, var(--fgg-gold-bright) 0%, var(--fgg-gold) 60%, var(--fgg-gold-deep) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            lineHeight: 1,
+          }}
+        >
+          FGG
+        </h1>
+        <div
+          className="fgg-eyebrow"
+          style={{ marginTop: 4, marginBottom: 10 }}
+        >
+          Four Guardian Gods
+        </div>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 14,
+            color: 'var(--fgg-text-dim)',
+            letterSpacing: '0.02em',
+          }}
+        >
+          사신수 타일 × 포커 족보 클라이밍 게임
+        </p>
       </div>
 
-      <div className="bg-gray-800 rounded-2xl p-8 w-full max-w-sm flex flex-col gap-5">
+      {/* Panel */}
+      <div
+        className="fgg-panel"
+        style={{
+          width: '100%',
+          maxWidth: 380,
+          padding: 28,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 18,
+        }}
+      >
         <div>
-          <label className="block text-sm text-gray-400 mb-1">닉네임</label>
+          <label
+            className="fgg-eyebrow"
+            style={{ display: 'block', marginBottom: 8 }}
+          >
+            닉네임
+          </label>
           <input
             ref={nameRef}
             id="player-name"
             defaultValue=""
             placeholder="이름 입력..."
             maxLength={12}
-            className="w-full bg-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={inputStyle}
           />
         </div>
 
         {mode === 'join' && (
           <div>
-            <label className="block text-sm text-gray-400 mb-1">방 코드</label>
+            <label
+              className="fgg-eyebrow"
+              style={{ display: 'block', marginBottom: 8 }}
+            >
+              방 코드
+            </label>
             <input
               ref={joinCodeRef}
               id="room-code"
               defaultValue=""
               placeholder="6자리 코드..."
               maxLength={6}
-              className="w-full bg-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-widest text-center text-xl font-bold"
+              style={{
+                ...inputStyle,
+                textAlign: 'center',
+                letterSpacing: '0.4em',
+                fontSize: 20,
+                fontWeight: 700,
+                fontFamily: 'var(--fgg-font-num)',
+                color: 'var(--fgg-gold-bright)',
+              }}
             />
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
           {mode !== 'join' && (
             <button
               id="btn-create"
-              onClick={() => { setMode('create'); handleCreate(); }}
+              onClick={() => {
+                setMode('create');
+                handleCreate();
+              }}
               disabled={loading}
-              className="py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 rounded-xl font-bold transition-colors"
+              className="fgg-btn fgg-btn--primary"
+              style={{ padding: '14px 18px', fontSize: 14 }}
             >
-              {loading && mode === 'create' ? '생성 중...' : '방 만들기'}
+              {loading && mode === 'create' ? '생성 중...' : '＋ 방 만들기'}
             </button>
           )}
 
           {mode !== 'create' && (
             <button
               id="btn-join"
-              onClick={() => mode === 'idle' ? setMode('join') : handleJoin()}
+              onClick={() => (mode === 'idle' ? setMode('join') : handleJoin())}
               disabled={loading}
-              className="py-3 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600 rounded-xl font-bold transition-colors"
+              className="fgg-btn"
+              style={{ padding: '14px 18px', fontSize: 14 }}
             >
               {mode === 'join' ? (loading ? '입장 중...' : '입장하기') : '방 입장'}
             </button>
           )}
 
           {mode !== 'idle' && (
-            <button onClick={handleBack} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
-              돌아가기
+            <button
+              onClick={handleBack}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--fgg-text-muted)',
+                fontSize: 12,
+                padding: '6px',
+                cursor: 'pointer',
+                letterSpacing: '0.05em',
+                transition: 'color 120ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--fgg-text-dim)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--fgg-text-muted)';
+              }}
+            >
+              ← 돌아가기
             </button>
           )}
 
           {errorMsg && (
-            <p className="text-sm text-red-400 text-center">{errorMsg}</p>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 12,
+                color: '#FF8088',
+                textAlign: 'center',
+                padding: '8px 12px',
+                background: 'rgba(230, 57, 70, 0.08)',
+                border: '1px solid rgba(230, 57, 70, 0.3)',
+                borderRadius: 8,
+              }}
+            >
+              {errorMsg}
+            </p>
           )}
         </div>
       </div>
 
-      <div className="text-xs text-gray-600 text-center">
-        3~5명 플레이 · 온라인 멀티플레이
+      {/* Footer */}
+      <div
+        style={{
+          marginTop: 28,
+          fontSize: 11,
+          color: 'var(--fgg-text-muted)',
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+        }}
+      >
+        3~5인 · 온라인 멀티플레이
       </div>
     </div>
   );
