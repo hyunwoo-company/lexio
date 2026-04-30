@@ -77,17 +77,17 @@ jobs:
           cd k8s-helm
           SHORT_SHA="${{ needs.build-and-push.outputs.short_sha }}"
           NEW_TAG="sha-${SHORT_SHA}"
-          # 'tag: "..."' 라인 한 곳만 교체 (apps/lexio/values.yaml의 image 블록)
-          sed -i -E "s|^(  tag: ).*$|\1\"${NEW_TAG}\"|" apps/lexio/values.yaml
+          # 'tag: "..."' 라인 한 곳만 교체 (apps/fgg-api/values.yaml의 image 블록)
+          sed -i -E "s|^(  tag: ).*$|\1\"${NEW_TAG}\"|" apps/fgg-api/values.yaml
           echo "── 변경 결과 ──"
-          grep -n "^  tag:" apps/lexio/values.yaml || true
+          grep -n "^  tag:" apps/fgg-api/values.yaml || true
 
       - name: Commit & push
         run: |
           cd k8s-helm
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add apps/lexio/values.yaml
+          git add apps/fgg-api/values.yaml
           if git diff --cached --quiet; then
             echo "변경 없음, skip"
             exit 0
