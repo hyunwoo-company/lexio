@@ -11,28 +11,40 @@ import { ActionBar } from './ActionBar';
 import { ScoreBoard } from './ScoreBoard';
 import type { ClientPlayer, Tile } from '@lexio/game-logic';
 
-// 사람 수별 좌석 위치 (% 단위, 절대좌표)
+// 사람 수별 좌석 위치 (% 단위, 절대좌표) + anchor (좌석을 viewport 안쪽으로 정렬해 잘림 방지)
 // 0번 = me (항상 하단 중앙). 1번~ = 시계방향(왼쪽 → 위 → 오른쪽)으로 상대들 배치.
-const SEAT_LAYOUTS: Record<3 | 4 | 5, { x: number; y: number }[]> = {
+type SeatAnchor = 'top' | 'bottom' | 'left' | 'right';
+
+const SEAT_LAYOUTS: Record<3 | 4 | 5, { x: number; y: number; anchor: SeatAnchor }[]> = {
   3: [
-    { x: 50, y: 88 },
-    { x: 14, y: 30 },
-    { x: 86, y: 30 },
+    { x: 50, y: 88, anchor: 'bottom' },
+    { x: 4,  y: 28, anchor: 'left' },
+    { x: 96, y: 28, anchor: 'right' },
   ],
   4: [
-    { x: 50, y: 88 },
-    { x: 10, y: 46 },
-    { x: 50, y: 14 },
-    { x: 90, y: 46 },
+    { x: 50, y: 88, anchor: 'bottom' },
+    { x: 4,  y: 46, anchor: 'left' },
+    { x: 50, y: 14, anchor: 'top' },
+    { x: 96, y: 46, anchor: 'right' },
   ],
   5: [
-    { x: 50, y: 88 },
-    { x: 10, y: 56 },
-    { x: 26, y: 16 },
-    { x: 74, y: 16 },
-    { x: 90, y: 56 },
+    { x: 50, y: 88, anchor: 'bottom' },
+    { x: 4,  y: 56, anchor: 'left' },
+    { x: 22, y: 14, anchor: 'top' },
+    { x: 78, y: 14, anchor: 'top' },
+    { x: 96, y: 56, anchor: 'right' },
   ],
 };
+
+function transformForAnchor(anchor: SeatAnchor): string {
+  switch (anchor) {
+    case 'left':   return 'translate(0, -50%)';
+    case 'right':  return 'translate(-100%, -50%)';
+    case 'top':    return 'translate(-50%, 0)';
+    case 'bottom':
+    default:       return 'translate(-50%, -50%)';
+  }
+}
 
 // 내 자리(0번) 다음부터 시계방향으로 상대 배치 — gameState.players의 순서를 좌석 인덱스에 매핑
 function makeSeatedPlayers(players: ClientPlayer[], myId: string): { player: ClientPlayer; seatIdx: number }[] {
@@ -193,7 +205,7 @@ export function GameBoard() {
                 position: 'absolute',
                 left: `${seat.x}%`,
                 top: `${seat.y}%`,
-                transform: 'translate(-50%, -50%)',
+                transform: transformForAnchor(seat.anchor),
                 zIndex: 5,
               }}
             >
@@ -223,8 +235,8 @@ export function GameBoard() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '6px 18px',
+            gap: 14,
+            padding: '6px 18px 0',
           }}
         >
           {me && (
@@ -236,21 +248,10 @@ export function GameBoard() {
               showFan={false}
             />
           )}
-          <div
-            style={{
-              fontSize: 11,
-              color: 'var(--fgg-text-dim)',
-              display: 'flex',
-              gap: 12,
-              alignItems: 'center',
-            }}
-          >
-            <span>손패 {me?.hand?.length ?? 0}장</span>
-          </div>
         </div>
 
         {/* 손패 */}
-        <PlayerHand hand={(me?.hand ?? []) as Tile[]} isMyTurn={isMyTurn} />
+        <PlayerHand hand={(me?.hand ?? []) as Tile[]} isMyTurn={isMyTurn} sortMode={sortMode} />
 
         {/* 액션바 */}
         <ActionBar

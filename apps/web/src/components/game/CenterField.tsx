@@ -116,12 +116,14 @@ export function CenterField({ lastPlay, lastPlayerName }: CenterFieldProps) {
       {lastPlayerName && (
         <div
           style={{
-            fontSize: 11,
-            color: 'var(--fgg-text-muted)',
+            fontSize: 12,
+            color: 'var(--fgg-text-dim)',
             fontFamily: 'var(--fgg-font-display)',
+            letterSpacing: '0.02em',
           }}
         >
-          ◇ {lastPlayerName}이(가) 냄
+          ◇ <span style={{ color: 'var(--fgg-gold-bright)', fontWeight: 600 }}>{lastPlayerName}</span>{' '}
+          <span style={{ color: 'var(--fgg-text-muted)' }}>가 냄</span>
         </div>
       )}
     </div>

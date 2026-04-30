@@ -21,7 +21,8 @@ export function PlayerSeat({
   showFan = true,
 }: PlayerSeatProps) {
   const dims = size === 'sm' ? { ava: 36, font: 11 } : { ava: 44, font: 12 };
-  const tilesShown = Math.min(player.handCount, size === 'sm' ? 7 : 9);
+  // 좌석에서 시각적으로 보여줄 패뒷면 개수 (실제 개수는 카운트 버블에 표시됨)
+  const tilesShown = Math.min(player.handCount, size === 'sm' ? 5 : 7);
   const initial = player.name?.[0] ?? '?';
 
   return (
