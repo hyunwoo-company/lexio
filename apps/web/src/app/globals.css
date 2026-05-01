@@ -39,21 +39,16 @@
   --fgg-font-num:     'Cormorant Garamond', 'Noto Serif KR', Georgia, serif;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   @apply bg-gray-950 text-white;
-  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
   background: var(--fgg-bg-0);
   color: var(--fgg-text);
-  /* overflow-x: hidden 단독은 일부 브라우저에서 overflow-y도 강제 hidden 처리 → vertical scroll 차단됨.
-     overflow-y: auto 명시해서 vertical 스크롤 보장 */
-  overflow-x: clip;
-  overflow-y: auto;
-}
-
-html {
-  overflow-x: clip;
-  overflow-y: auto;
 }
 
 * {
