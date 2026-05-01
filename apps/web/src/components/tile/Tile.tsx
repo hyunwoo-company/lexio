@@ -4,11 +4,8 @@ import type { Tile as TileType } from '@lexio/game-logic';
 
 type Suit = 'sun' | 'moon' | 'star' | 'cloud';
 
-// FGG 사신수 매핑 (이미지: 사용자 제공 일러스트)
-//   sun   = 주작 (Vermilion Bird) — 火/陽/태양     → 붉은 숫자
-//   moon  = 현무 (Black Tortoise) — 水/陰/달빛     → 초록 숫자
-//   star  = 백호 (White Tiger)    — 金/별자리      → 검정 숫자 (이미지가 흰 호랑이)
-//   cloud = 청룡 (Azure Dragon)   — 木/雲從龍      → 푸른 숫자
+// FGG 사신수 — 주작(火/南) / 현무(水/北) / 백호(金/西) / 청룡(木/東)
+// 내부 suit 키는 게임로직 호환용 (UI에는 노출 안 함)
 const SUIT: Record<Suit, { name: string; color: string; img: string }> = {
   sun:   { name: '주작', color: '#C8323D', img: '/sasinsoo/jujak.png' },
   moon:  { name: '현무', color: '#2A8C56', img: '/sasinsoo/hyunmu.png' },

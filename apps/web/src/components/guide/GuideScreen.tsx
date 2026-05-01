@@ -275,32 +275,12 @@ export function GuideScreen() {
                       >
                         {SASIN[s].name}
                       </span>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: 'var(--fgg-text-muted)',
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                        }}
-                      >
-                        {s}
-                      </span>
                     </span>
                     {i < 3 && (
                       <span style={{ color: 'var(--fgg-text-muted)' }}>›</span>
                     )}
                   </span>
                 ))}
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: 'var(--fgg-text-muted)',
-                  marginTop: 10,
-                  lineHeight: 1.5,
-                }}
-              >
-                sun=주작 · moon=현무 · star=백호 · cloud=청룡
               </div>
             </div>
           </div>
@@ -392,7 +372,7 @@ export function GuideScreen() {
             },
             {
               title: '첫 선 (先)',
-              body: '가장 약한 타일인 청룡 2(cloud-2) 보유자가 첫 선이 됩니다.',
+              body: '가장 약한 타일인 청룡 2 보유자가 첫 선이 됩니다.',
             },
           ].map((s) => (
             <div
