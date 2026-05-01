@@ -1,6 +1,5 @@
 'use client';
 
-import { TileBack } from '@/components/tile/Tile';
 import type { ClientPlayer } from '@lexio/game-logic';
 
 interface PlayerSeatProps {
@@ -9,6 +8,7 @@ interface PlayerSeatProps {
   isTurn: boolean;
   passed?: boolean;
   size?: 'sm' | 'md';
+  /** @deprecated 패뒷면은 더 이상 표시 안 함 */
   showFan?: boolean;
 }
 
@@ -18,142 +18,120 @@ export function PlayerSeat({
   isTurn,
   passed = false,
   size = 'md',
-  showFan = true,
 }: PlayerSeatProps) {
-  const dims = size === 'sm' ? { ava: 36, font: 11 } : { ava: 44, font: 12 };
-  // 좌석에서 시각적으로 보여줄 패뒷면 개수 (실제 개수는 카운트 버블에 표시됨)
-  const tilesShown = Math.min(player.handCount, size === 'sm' ? 5 : 7);
+  const dims = size === 'sm' ? { ava: 30, font: 11, stat: 10 } : { ava: 38, font: 12, stat: 11 };
   const initial = player.name?.[0] ?? '?';
 
   return (
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        gap: 6,
+        gap: 8,
+        padding: size === 'sm' ? '5px 10px 5px 5px' : '6px 12px 6px 6px',
+        borderRadius: 999,
+        background: isTurn ? 'rgba(212,166,86,0.18)' : 'rgba(10,15,13,0.7)',
+        border: `1.5px solid ${
+          isTurn ? 'var(--fgg-gold)' : !player.isConnected ? 'rgba(230,57,70,0.5)' : 'var(--fgg-line)'
+        }`,
+        boxShadow: isTurn
+          ? '0 0 18px rgba(242,200,120,0.45), inset 0 1px 0 rgba(255,255,255,0.06)'
+          : '0 4px 12px rgba(0,0,0,0.35)',
         opacity: passed ? 0.45 : 1,
-        transition: 'opacity 200ms',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+        transition: 'all 220ms',
+        whiteSpace: 'nowrap',
       }}
     >
-      {/* 패뒷면 부채꼴 */}
-      {showFan && player.handCount > 0 && (
+      {/* 아바타 */}
+      <div
+        style={{
+          width: dims.ava,
+          height: dims.ava,
+          borderRadius: '50%',
+          background: isMe
+            ? 'linear-gradient(135deg, #1A4030, #0A2018)'
+            : 'linear-gradient(135deg, #3A2D1A, #1A1408)',
+          border: `1.5px solid ${isTurn ? 'var(--fgg-gold-bright)' : isMe ? 'var(--fgg-cheongryong)' : 'rgba(212,166,86,0.4)'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'var(--fgg-font-display)',
+          fontWeight: 600,
+          fontSize: dims.ava * 0.46,
+          color: 'var(--fgg-gold-bright)',
+          flexShrink: 0,
+          lineHeight: 1,
+        }}
+      >
+        {initial}
+      </div>
+
+      {/* 이름 + 타일 + 코인 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, lineHeight: 1.05 }}>
+        <span
+          style={{
+            fontSize: dims.font,
+            fontWeight: 600,
+            color: isTurn ? 'var(--fgg-gold-bright)' : 'var(--fgg-text)',
+            maxWidth: 90,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {player.name}
+        </span>
         <div
           style={{
             display: 'flex',
-            gap: 2,
-            padding: size === 'sm' ? '4px 6px 8px' : '6px 8px 10px',
-            borderRadius: 8,
-            background: 'rgba(0,0,0,0.18)',
-            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.25)',
+            gap: 8,
+            fontSize: dims.stat,
+            color: 'var(--fgg-text-dim)',
+            fontFamily: 'var(--fgg-font-num)',
           }}
         >
-          {Array.from({ length: tilesShown }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                transform: `translateY(${Math.abs(i - tilesShown / 2) * 1.2}px)`,
-              }}
-            >
-              <TileBack size="sm" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
-        {/* 아바타 + 차례 ring */}
-        <div style={{ position: 'relative' }}>
-          <div
+          {/* 타일 카운트 — 골드 강조 */}
+          <span
             style={{
-              width: dims.ava,
-              height: dims.ava,
-              borderRadius: '50%',
-              background: isMe
-                ? 'linear-gradient(135deg, #1A4030, #0A2018)'
-                : 'linear-gradient(135deg, #3A2D1A, #1A1408)',
-              border: `2px solid ${isTurn ? 'var(--fgg-gold-bright)' : isMe ? 'var(--fgg-cheongryong)' : 'var(--fgg-line)'}`,
-              boxShadow: isTurn ? '0 0 16px rgba(242, 200, 120, 0.6)' : 'none',
-              display: 'flex',
+              color: 'var(--fgg-gold-bright)',
+              fontWeight: 700,
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'var(--fgg-font-display)',
-              fontWeight: 600,
-              fontSize: dims.ava * 0.42,
-              color: 'var(--fgg-gold-bright)',
+              gap: 2,
             }}
+            title="남은 타일"
           >
-            {initial}
-          </div>
-          {/* 타일 카운트 버블 */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -4,
-              right: -6,
-              background: '#0A0F0D',
-              color: 'var(--fgg-gold-bright)',
-              fontFamily: 'var(--fgg-font-num)',
-              fontSize: 11,
-              fontWeight: 600,
-              padding: '1px 5px',
-              borderRadius: 8,
-              border: '1px solid var(--fgg-line-strong)',
-              minWidth: 18,
-              textAlign: 'center',
-              lineHeight: 1.2,
-            }}
-          >
+            <span style={{ fontSize: dims.stat - 1 }}>🀫</span>
             {player.handCount}
-          </div>
-        </div>
-
-        {/* 이름 + 칩 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: dims.font,
-              fontWeight: 600,
-              color: isTurn ? 'var(--fgg-gold-bright)' : 'var(--fgg-text)',
-              whiteSpace: 'nowrap',
-              maxWidth: 96,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
+          </span>
+          {/* 코인 */}
+          <span
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}
+            title="칩"
           >
-            {player.name}
-          </div>
-          <div style={{ fontSize: 10, color: 'var(--fgg-text-dim)' }}>💰 {player.chips}</div>
+            <span style={{ fontSize: dims.stat - 1 }}>💰</span>
+            {player.chips}
+          </span>
         </div>
       </div>
 
-      {/* 상태 pill */}
-      {(isTurn || passed || !player.isConnected) && (
-        <div
+      {/* 상태 라벨 (오른쪽 끝 작은 dot/text) */}
+      {passed && !isTurn && (
+        <span
           style={{
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            padding: '2px 8px',
-            borderRadius: 999,
-            background: isTurn ? 'rgba(242, 200, 120, 0.15)' : 'rgba(255,255,255,0.05)',
-            color: !player.isConnected
-              ? '#FF8088'
-              : isTurn
-              ? 'var(--fgg-gold-bright)'
-              : 'var(--fgg-text-dim)',
-            border: `1px solid ${
-              !player.isConnected
-                ? 'rgba(230,57,70,0.4)'
-                : isTurn
-                ? 'var(--fgg-gold)'
-                : 'var(--fgg-line)'
-            }`,
+            fontSize: 9,
+            color: '#FF8088',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            paddingLeft: 4,
           }}
         >
-          {!player.isConnected ? '연결 끊김' : isTurn ? '차례' : '패스'}
-        </div>
+          PASS
+        </span>
+      )}
+      {!player.isConnected && (
+        <span style={{ fontSize: 9, color: '#FF8088', paddingLeft: 4 }}>⚠</span>
       )}
     </div>
   );

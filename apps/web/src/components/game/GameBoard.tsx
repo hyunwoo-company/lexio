@@ -23,16 +23,16 @@ const SEAT_LAYOUTS: Record<3 | 4 | 5, { x: number; y: number; anchor: SeatAnchor
   ],
   4: [
     { x: 50, y: 88, anchor: 'bottom' },
-    { x: 4,  y: 46, anchor: 'left' },
-    { x: 50, y: 14, anchor: 'top' },
-    { x: 96, y: 46, anchor: 'right' },
+    { x: 4,  y: 38, anchor: 'left' },
+    { x: 50, y: 26, anchor: 'top' },
+    { x: 96, y: 38, anchor: 'right' },
   ],
   5: [
     { x: 50, y: 88, anchor: 'bottom' },
-    { x: 4,  y: 56, anchor: 'left' },
-    { x: 22, y: 14, anchor: 'top' },
-    { x: 78, y: 14, anchor: 'top' },
-    { x: 96, y: 56, anchor: 'right' },
+    { x: 4,  y: 48, anchor: 'left' },
+    { x: 26, y: 22, anchor: 'top' },
+    { x: 74, y: 22, anchor: 'top' },
+    { x: 96, y: 48, anchor: 'right' },
   ],
 };
 
@@ -116,6 +116,23 @@ export function GameBoard() {
         overflow: 'hidden',
       }}
     >
+      {/* Portrait 안내 — 모바일 portrait에서만 표시 */}
+      <div className="fgg-portrait-warn">
+        <div className="fgg-portrait-warn__icon">📱</div>
+        <div
+          style={{
+            fontFamily: 'var(--fgg-font-display)',
+            fontSize: 24,
+            color: 'var(--fgg-gold-bright)',
+            letterSpacing: '0.04em',
+          }}
+        >
+          기기를 가로로 돌려주세요
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--fgg-text-dim)' }}>
+          FGG 게임은 가로 화면에서만 플레이 가능합니다.
+        </div>
+      </div>
       {/* 비네트 */}
       <div
         style={{
@@ -151,40 +168,53 @@ export function GameBoard() {
           flex: 1,
           minHeight: 0,
           position: 'relative',
+          perspective: '1400px',
+          perspectiveOrigin: '50% 90%',
         }}
       >
-        {/* Oval table outline */}
+        {/* Oval table outline — 3D 원근감 (시선이 약간 위에서 내려보는) */}
         <div
           style={{
             position: 'absolute',
-            left: '12%',
-            right: '12%',
-            top: '24%',
-            bottom: '32%',
+            left: '8%',
+            right: '8%',
+            top: '14%',
+            bottom: '20%',
             borderRadius: '50% / 40%',
-            border: '2px solid rgba(212, 166, 86, 0.25)',
+            border: '2px solid rgba(212, 166, 86, 0.3)',
             background:
-              'radial-gradient(ellipse at center, rgba(30, 92, 70, 0.6) 0%, rgba(14, 58, 44, 0.3) 70%, transparent 100%)',
-            boxShadow: 'inset 0 0 60px rgba(0,0,0,0.5), 0 0 80px rgba(0,0,0,0.4)',
+              'radial-gradient(ellipse at center 30%, rgba(30, 92, 70, 0.7) 0%, rgba(14, 58, 44, 0.35) 60%, transparent 90%)',
+            boxShadow: 'inset 0 0 80px rgba(0,0,0,0.55), 0 0 120px rgba(0,0,0,0.5)',
+            transform: 'rotateX(38deg)',
+            transformOrigin: '50% 100%',
             zIndex: 2,
+            pointerEvents: 'none',
           }}
         >
           <div
             style={{
               position: 'absolute',
-              inset: 18,
-              border: '1px solid rgba(212, 166, 86, 0.12)',
+              inset: 14,
+              border: '1px solid rgba(212, 166, 86, 0.15)',
+              borderRadius: '50% / 40%',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 28,
+              border: '1px dashed rgba(212, 166, 86, 0.08)',
               borderRadius: '50% / 40%',
             }}
           />
         </div>
 
-        {/* 중앙 필드 */}
+        {/* 중앙 필드 (NeoTaco 위쪽 좌석 회피해서 약간 아래로) */}
         <div
           style={{
             position: 'absolute',
             left: '50%',
-            top: '46%',
+            top: '58%',
             transform: 'translate(-50%, -50%)',
             zIndex: 4,
           }}
@@ -213,7 +243,7 @@ export function GameBoard() {
                 player={player}
                 isMe={false}
                 isTurn={isTurn}
-                size="md"
+                size="sm"
                 showFan={true}
               />
             </div>

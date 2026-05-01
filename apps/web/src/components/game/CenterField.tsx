@@ -86,8 +86,8 @@ export function CenterField({ lastPlay, lastPlayerName }: CenterFieldProps) {
         현재 필드
       </div>
 
-      {/* 부채꼴 fan으로 살짝 회전 */}
-      <div style={{ display: 'flex', gap: 6, padding: '4px 10px' }}>
+      {/* 부채꼴 fan으로 살짝 회전 (모바일 가로화면 fit을 위해 sm 사용) */}
+      <div style={{ display: 'flex', gap: 4, padding: '4px 10px' }}>
         {tiles.map((tile, i) => (
           <div
             key={tile.id}
@@ -97,7 +97,7 @@ export function CenterField({ lastPlay, lastPlayerName }: CenterFieldProps) {
               }px)`,
             }}
           >
-            <Tile tile={tile} disabled size="md" />
+            <Tile tile={tile} disabled size="sm" />
           </div>
         ))}
       </div>

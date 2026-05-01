@@ -96,6 +96,35 @@ html { overflow-x: hidden; }
   background: rgba(212, 166, 86, 0.06) !important;
 }
 
+/* ===== Portrait → landscape 안내 (게임 화면 한정) ===== */
+.fgg-portrait-warn {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 900px) {
+  .fgg-portrait-warn {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--fgg-bg-0);
+    color: var(--fgg-text);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 32px;
+    text-align: center;
+  }
+  .fgg-portrait-warn__icon {
+    font-size: 56px;
+    animation: fgg-rotate-hint 2.4s ease-in-out infinite;
+  }
+}
+@keyframes fgg-rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(90deg); }
+}
+
 /* ===== Combo card — desktop grid / mobile stack ===== */
 .fgg-combo-card {
   display: grid;
