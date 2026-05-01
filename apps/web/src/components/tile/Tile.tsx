@@ -4,120 +4,23 @@ import type { Tile as TileType } from '@lexio/game-logic';
 
 type Suit = 'sun' | 'moon' | 'star' | 'cloud';
 
-// FGG 사신수 매핑 (조선고적도보, public domain — Wikimedia Commons)
-//   sun   = 주작 (Vermilion Bird)
-//   moon  = 청룡 (Azure Dragon)
-//   star  = 백호 (White Tiger)
-//   cloud = 현무 (Black Tortoise)
-const SUIT: Record<Suit, { name: string; color: string; deep: string; img: string }> = {
-  sun:   { name: '주작', color: '#C8323D', deep: '#8C1F28', img: '/sasinsoo/jujak.jpg' },
-  moon:  { name: '청룡', color: '#2A8C56', deep: '#175C36', img: '/sasinsoo/cheongryong.jpg' },
-  star:  { name: '백호', color: '#D88438', deep: '#8C5320', img: '/sasinsoo/baekho.jpg' },
-  cloud: { name: '현무', color: '#3A5A8C', deep: '#1F2E4A', img: '/sasinsoo/hyunmu.jpg' },
+// FGG 사신수 매핑 (이미지: 사용자 제공 일러스트)
+//   sun   = 주작 (Vermilion Bird) — 火/陽/태양     → 붉은 숫자
+//   moon  = 현무 (Black Tortoise) — 水/陰/달빛     → 초록 숫자
+//   star  = 백호 (White Tiger)    — 金/별자리      → 검정 숫자 (이미지가 흰 호랑이)
+//   cloud = 청룡 (Azure Dragon)   — 木/雲從龍      → 푸른 숫자
+const SUIT: Record<Suit, { name: string; color: string; img: string }> = {
+  sun:   { name: '주작', color: '#C8323D', img: '/sasinsoo/jujak.png' },
+  moon:  { name: '현무', color: '#2A8C56', img: '/sasinsoo/hyunmu.png' },
+  star:  { name: '백호', color: '#1A1408', img: '/sasinsoo/baekho.png' },
+  cloud: { name: '청룡', color: '#3A5A8C', img: '/sasinsoo/cheongryong.png' },
 };
 
 const SIZE = {
-  sm: { w: 38, h: 54, crest: 32, num: 14, corner: 9,  radius: 5 },
-  md: { w: 52, h: 76, crest: 48, num: 22, corner: 12, radius: 7 },
-  lg: { w: 66, h: 96, crest: 62, num: 30, corner: 16, radius: 9 },
+  sm: { w: 40, h: 56, num: 12, padX: 4,  padY: 12, radius: 5 },
+  md: { w: 56, h: 80, num: 17, padX: 5,  padY: 16, radius: 7 },
+  lg: { w: 72, h: 102, num: 22, padX: 6, padY: 20, radius: 9 },
 };
-
-/* ───── 사신수 이미지 crest ─────
-   조선고적도보(1932) 사신도 사진. 사진 배경(누런 종이)을 타일 아이보리와
-   자연스럽게 섞기 위해 mix-blend-mode: multiply 사용. */
-function ImageCrest({ suit, size, isAce }: { suit: Suit; size: number; isAce?: boolean }) {
-  const s = SUIT[suit];
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        overflow: 'hidden',
-        border: isAce
-          ? `1.6px solid ${s.color}`
-          : `1px solid ${s.color}55`,
-        boxShadow: isAce
-          ? `0 0 0 2px rgba(212,166,86,0.55), 0 0 12px ${s.color}66, inset 0 0 8px rgba(255,255,255,0.18)`
-          : `inset 0 0 6px rgba(255,255,255,0.12)`,
-        background: `radial-gradient(circle, rgba(255,250,235,0.45) 0%, rgba(245,230,200,0.05) 70%)`,
-      }}
-    >
-      {/* 동양화 이미지 (mix-blend-mode: multiply로 종이 배경을 타일 아이보리와 합성) */}
-      <img
-        src={s.img}
-        alt={s.name}
-        loading="lazy"
-        decoding="async"
-        draggable={false}
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center',
-          mixBlendMode: 'multiply',
-          filter: isAce ? 'saturate(1.15) contrast(1.05)' : 'saturate(0.95)',
-          userSelect: 'none',
-          pointerEvents: 'none',
-        }}
-      />
-    </div>
-  );
-}
-
-/* ───── 1번(ace) 화려 외곽 ─────
-   이미지 위에 gold filigree ring + 코너 별 + 외곽 glow. */
-function AceOrnate({ size, color }: { size: number; color: string }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-    >
-      {/* 외곽 톱니 — 금테두리 */}
-      {Array.from({ length: 24 }).map((_, i) => {
-        const a = (i * Math.PI * 2) / 24 - Math.PI / 2;
-        const x1 = 50 + Math.cos(a) * 47;
-        const y1 = 50 + Math.sin(a) * 47;
-        const x2 = 50 + Math.cos(a) * 49;
-        const y2 = 50 + Math.sin(a) * 49;
-        return (
-          <line
-            key={i}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            stroke="#F2C878"
-            strokeWidth={1.2}
-            strokeLinecap="round"
-          />
-        );
-      })}
-      {/* 4방위 별 */}
-      {[0, 90, 180, 270].map((deg) => {
-        const a = (deg * Math.PI) / 180 - Math.PI / 2;
-        const cx = 50 + Math.cos(a) * 50;
-        const cy = 50 + Math.sin(a) * 50;
-        return (
-          <polygon
-            key={deg}
-            points={Array.from({ length: 8 }).map((_, j) => {
-              const aa = (j * Math.PI) / 4;
-              const r = j % 2 === 0 ? 3.2 : 1.4;
-              return `${cx + Math.cos(aa) * r},${cy + Math.sin(aa) * r}`;
-            }).join(' ')}
-            fill="#F2C878"
-            stroke={color}
-            strokeWidth={0.4}
-          />
-        );
-      })}
-    </svg>
-  );
-}
 
 interface TileProps {
   tile: TileType;
@@ -165,64 +68,91 @@ export function Tile({ tile, isSelected, onClick, disabled, size = 'md' }: TileP
         }}
       />
 
-      {/* 가운데 사신수 이미지 + 숫자 */}
+      {/* 가운데 사신수 이미지 — 동그라미 없이 자연스럽게, 가로형 이미지를 contain */}
       <div
         style={{
           position: 'absolute',
-          inset: 0,
+          top: d.padY,
+          bottom: d.padY,
+          left: d.padX,
+          right: d.padX,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1,
         }}
       >
-        <div style={{ position: 'relative', width: d.crest, height: d.crest }}>
-          <ImageCrest suit={tile.suit as Suit} size={d.crest} isAce={isAce} />
-          {isAce && <AceOrnate size={d.crest} color={s.color} />}
-          <span
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'Cormorant Garamond, "Noto Serif KR", Georgia, serif',
-              fontWeight: isAce ? 900 : 800,
-              fontSize: isAce ? d.num + 2 : d.num,
-              lineHeight: 1,
-              color: isAce ? '#1A1408' : s.color,
-              textShadow: isAce
-                ? '0 0 8px rgba(255,255,235,0.95), 0 0 14px rgba(242,200,120,0.8), 0 1px 0 rgba(255,250,230,0.9)'
-                : '0 1px 0 rgba(255, 250, 230, 0.7)',
-              letterSpacing: '-0.03em',
-              pointerEvents: 'none',
-            }}
-          >
-            {tile.number}
-          </span>
-        </div>
+        <img
+          src={s.img}
+          alt={s.name}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+            mixBlendMode: 'multiply',
+            filter: isAce ? 'saturate(1.15) contrast(1.05)' : 'saturate(0.97)',
+            userSelect: 'none',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
 
-      {/* 우하단 코너 미니 crest (이미지 작게) */}
+      {/* 좌측상단 숫자 */}
       <span
         style={{
           position: 'absolute',
-          right: Math.max(2, d.w * 0.08),
-          bottom: Math.max(2, d.h * 0.05),
-          zIndex: 2,
-          opacity: 0.8,
+          top: 2,
+          left: 4,
+          fontFamily: 'Cormorant Garamond, "Noto Serif KR", Georgia, serif',
+          fontWeight: 800,
+          fontSize: d.num,
+          lineHeight: 1,
+          color: s.color,
+          textShadow: '0 1px 0 rgba(255, 250, 230, 0.7)',
+          letterSpacing: '-0.03em',
+          zIndex: 3,
+          pointerEvents: 'none',
+          userSelect: 'none',
         }}
       >
-        <ImageCrest suit={tile.suit as Suit} size={d.corner} />
+        {tile.number}
       </span>
 
-      {/* 외곽 림 */}
+      {/* 우측하단 숫자 (180° 회전) */}
+      <span
+        style={{
+          position: 'absolute',
+          bottom: 2,
+          right: 4,
+          fontFamily: 'Cormorant Garamond, "Noto Serif KR", Georgia, serif',
+          fontWeight: 800,
+          fontSize: d.num,
+          lineHeight: 1,
+          color: s.color,
+          textShadow: '0 1px 0 rgba(255, 250, 230, 0.7)',
+          letterSpacing: '-0.03em',
+          transform: 'rotate(180deg)',
+          transformOrigin: 'center',
+          zIndex: 3,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        {tile.number}
+      </span>
+
+      {/* 외곽 림 — ace는 골드 강조 */}
       <span
         style={{
           position: 'absolute',
           inset: 0,
-          border: isAce ? '1.5px solid rgba(212,166,86,0.55)' : '1px solid rgba(140, 110, 60, 0.35)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,250,230,0.5)',
+          border: isAce ? '1.5px solid rgba(212,166,86,0.7)' : '1px solid rgba(140, 110, 60, 0.35)',
+          boxShadow: isAce
+            ? 'inset 0 0 0 1px rgba(255,250,230,0.7), 0 0 14px rgba(242,200,120,0.45)'
+            : 'inset 0 0 0 1px rgba(255,250,230,0.5)',
           pointerEvents: 'none',
           borderRadius: 'inherit',
           zIndex: 5,

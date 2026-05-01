@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSocket } from '@/hooks/useSocket';
 import { useGameStore, type RoomInfo } from '@/store/gameStore';
@@ -315,6 +316,59 @@ export function LobbyScreen() {
               {errorMsg}
             </p>
           )}
+        </div>
+
+        {/* Help links — ghost gold */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            justifyContent: 'center',
+            paddingTop: 14,
+            marginTop: 4,
+            borderTop: '1px solid var(--fgg-line)',
+          }}
+        >
+          <Link
+            href="/guide"
+            className="fgg-help-link"
+            style={{
+              flex: 1,
+              padding: '9px 12px',
+              fontSize: 12,
+              textAlign: 'center',
+              borderRadius: 8,
+              border: '1px solid var(--fgg-line)',
+              background: 'transparent',
+              color: 'var(--fgg-gold)',
+              textDecoration: 'none',
+              letterSpacing: '0.04em',
+              fontWeight: 500,
+              transition: 'border-color 120ms, color 120ms, background 120ms',
+            }}
+          >
+            📖 족보 보기
+          </Link>
+          <Link
+            href="/tutorial"
+            className="fgg-help-link"
+            style={{
+              flex: 1,
+              padding: '9px 12px',
+              fontSize: 12,
+              textAlign: 'center',
+              borderRadius: 8,
+              border: '1px solid var(--fgg-line)',
+              background: 'transparent',
+              color: 'var(--fgg-gold)',
+              textDecoration: 'none',
+              letterSpacing: '0.04em',
+              fontWeight: 500,
+              transition: 'border-color 120ms, color 120ms, background 120ms',
+            }}
+          >
+            🎓 튜토리얼
+          </Link>
         </div>
       </div>
 

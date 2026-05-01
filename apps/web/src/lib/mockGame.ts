@@ -6,7 +6,7 @@ const t = (number: number, suit: 'sun' | 'moon' | 'star' | 'cloud'): Tile => ({
   suit,
 });
 
-// FGG 사신수 매핑: sun=주작, moon=청룡, star=백호, cloud=현무
+// FGG 사신수 매핑: sun=주작, moon=현무, star=백호, cloud=청룡
 
 const HAND_3P: Tile[] = [
   t(2, 'cloud'), t(3, 'sun'),  t(4, 'moon'), t(5, 'star'), t(6, 'cloud'),

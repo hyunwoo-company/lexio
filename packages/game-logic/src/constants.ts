@@ -8,8 +8,8 @@ export const NUMBER_RANK: Record<TileNumber, number> = {
   1: 14,
 };
 
-// 문양 서열: 주작(sun)이 최강(3), 현무(cloud)가 최약(0)
-// sun=주작, moon=청룡, star=백호, cloud=현무
+// 문양 서열: sun이 최강(3), cloud가 최약(0)
+// 사신수 매핑: sun=주작(火) > moon=현무(水) > star=백호(金) > cloud=청룡(木)
 export const SUIT_RANK: Record<Suit, number> = {
   cloud: 0,
   star: 1,
@@ -38,10 +38,10 @@ export const GAME_CONFIG: Record<PlayerCount, GameConfig> = {
 
 export const ALL_SUITS: Suit[] = ['sun', 'moon', 'star', 'cloud'];
 
-// 사신수 매핑
+// 사신수 매핑 (운종룡: 청룡↔구름, 양↔태양: 주작↔해, 음↔달: 현무↔달, 별↔백호)
 export const SUIT_LABEL: Record<Suit, string> = {
   sun: '주작',
-  moon: '청룡',
+  moon: '현무',
   star: '백호',
-  cloud: '현무',
+  cloud: '청룡',
 };

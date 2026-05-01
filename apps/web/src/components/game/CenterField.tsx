@@ -56,7 +56,7 @@ export function CenterField({ lastPlay, lastPlayerName }: CenterFieldProps) {
             fontSize: 14,
           }}
         >
-          현무2 보유자가 시작
+          청룡2 보유자가 시작
         </div>
       </div>
     );

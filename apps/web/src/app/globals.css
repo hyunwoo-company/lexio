@@ -6,11 +6,11 @@
 
 /* ===== FGG Design System — Premium Dark / Casino Poker Room ===== */
 :root {
-  /* 사신수 컬러 (suit) */
+  /* 사신수 컬러 (suit) — 매핑: sun=주작 / moon=현무 / star=백호 / cloud=청룡 */
   --fgg-jujak:        #C8323D;  /* 주작 / sun  */
-  --fgg-cheongryong:  #2A8C56;  /* 청룡 / moon */
-  --fgg-baekho:       #D88438;  /* 백호 / star */
-  --fgg-hyunmu:       #3A5A8C;  /* 현무 / cloud */
+  --fgg-cheongryong:  #2A8C56;  /* 청룡 / cloud */
+  --fgg-baekho:       #D88438;  /* 백호 / star  */
+  --fgg-hyunmu:       #3A5A8C;  /* 현무 / moon  */
 
   /* 브랜드 골드 */
   --fgg-gold:         #D4A656;
