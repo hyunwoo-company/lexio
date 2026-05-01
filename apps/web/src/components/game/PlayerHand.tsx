@@ -37,28 +37,18 @@ export function PlayerHand({ hand, isMyTurn, sortMode = 'number' }: PlayerHandPr
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 4,
-        padding: '6px 0 0',
+        gap: 0,
+        padding: '0',
       }}
     >
-      <p
-        style={{
-          fontSize: 11,
-          color: 'var(--fgg-text-muted)',
-          margin: 0,
-          letterSpacing: '0.06em',
-        }}
-      >
-        내 손패 · {hand.length}장
-      </p>
       <div
         style={
           {
             display: 'flex',
             flexWrap: 'nowrap',
             overflowX: 'auto',
-            gap: 5,
-            padding: '12px 16px 18px',
+            gap: 4,
+            padding: '8px 12px 8px',
             maxWidth: '100vw',
             boxSizing: 'border-box',
             scrollbarWidth: 'none',

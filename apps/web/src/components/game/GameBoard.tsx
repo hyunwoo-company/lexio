@@ -168,43 +168,56 @@ export function GameBoard() {
           flex: 1,
           minHeight: 0,
           position: 'relative',
-          perspective: '1400px',
-          perspectiveOrigin: '50% 90%',
+          perspective: '700px',
+          perspectiveOrigin: '50% 110%',
         }}
       >
-        {/* Oval table outline — 3D 원근감 (시선이 약간 위에서 내려보는) */}
+        {/* Oval table — 진짜 3D 기울기로 카지노 테이블 시점 (앞 가까움, 뒤 멀어짐) */}
         <div
           style={{
             position: 'absolute',
-            left: '8%',
-            right: '8%',
-            top: '14%',
-            bottom: '20%',
-            borderRadius: '50% / 40%',
-            border: '2px solid rgba(212, 166, 86, 0.3)',
+            left: '4%',
+            right: '4%',
+            top: '8%',
+            bottom: '6%',
+            borderRadius: '50% / 38%',
+            border: '3px solid rgba(212, 166, 86, 0.55)',
             background:
-              'radial-gradient(ellipse at center 30%, rgba(30, 92, 70, 0.7) 0%, rgba(14, 58, 44, 0.35) 60%, transparent 90%)',
-            boxShadow: 'inset 0 0 80px rgba(0,0,0,0.55), 0 0 120px rgba(0,0,0,0.5)',
-            transform: 'rotateX(38deg)',
+              'radial-gradient(ellipse at center 35%, rgba(46, 120, 88, 0.88) 0%, rgba(24, 78, 56, 0.7) 45%, rgba(12, 50, 36, 0.4) 80%)',
+            boxShadow:
+              'inset 0 0 120px rgba(0,0,0,0.55), inset 0 -20px 40px rgba(0,0,0,0.35), 0 30px 60px rgba(0,0,0,0.6)',
+            transform: 'rotateX(58deg)',
             transformOrigin: '50% 100%',
             zIndex: 2,
             pointerEvents: 'none',
           }}
         >
+          {/* 황금 핀스트라이프 */}
           <div
             style={{
               position: 'absolute',
               inset: 14,
-              border: '1px solid rgba(212, 166, 86, 0.15)',
-              borderRadius: '50% / 40%',
+              border: '1.5px solid rgba(212, 166, 86, 0.3)',
+              borderRadius: '50% / 38%',
             }}
           />
           <div
             style={{
               position: 'absolute',
-              inset: 28,
-              border: '1px dashed rgba(212, 166, 86, 0.08)',
-              borderRadius: '50% / 40%',
+              inset: 32,
+              border: '1px dashed rgba(212, 166, 86, 0.18)',
+              borderRadius: '50% / 38%',
+            }}
+          />
+          {/* 펠트 패턴 */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 'inherit',
+              backgroundImage:
+                'repeating-radial-gradient(circle at 50% 30%, rgba(255,255,255,0.02) 0 1px, transparent 1px 4px)',
+              pointerEvents: 'none',
             }}
           />
         </div>
