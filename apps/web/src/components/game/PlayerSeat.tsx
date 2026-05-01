@@ -68,52 +68,52 @@ export function PlayerSeat({
         {initial}
       </div>
 
-      {/* 이름 + 타일 + 코인 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, lineHeight: 1.05 }}>
+      {/* 이름 + 타일 + 코인 — 한 줄 (세로 공간 절약) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 7,
+          minWidth: 0,
+          lineHeight: 1.1,
+        }}
+      >
         <span
           style={{
             fontSize: dims.font,
             fontWeight: 600,
             color: isTurn ? 'var(--fgg-gold-bright)' : 'var(--fgg-text)',
-            maxWidth: 90,
+            maxWidth: 80,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
           }}
         >
           {player.name}
         </span>
-        <div
+        {/* 타일 카운트 — 골드 강조 */}
+        <span
           style={{
-            display: 'flex',
-            gap: 8,
+            color: 'var(--fgg-gold-bright)',
+            fontWeight: 700,
             fontSize: dims.stat,
-            color: 'var(--fgg-text-dim)',
             fontFamily: 'var(--fgg-font-num)',
           }}
+          title="남은 타일"
         >
-          {/* 타일 카운트 — 골드 강조 */}
-          <span
-            style={{
-              color: 'var(--fgg-gold-bright)',
-              fontWeight: 700,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 2,
-            }}
-            title="남은 타일"
-          >
-            <span style={{ fontSize: dims.stat - 1 }}>🀫</span>
-            {player.handCount}
-          </span>
-          {/* 코인 */}
-          <span
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}
-            title="칩"
-          >
-            <span style={{ fontSize: dims.stat - 1 }}>💰</span>
-            {player.chips}
-          </span>
-        </div>
+          🀫{player.handCount}
+        </span>
+        {/* 코인 */}
+        <span
+          style={{
+            color: 'var(--fgg-text-dim)',
+            fontSize: dims.stat,
+            fontFamily: 'var(--fgg-font-num)',
+          }}
+          title="칩"
+        >
+          💰{player.chips}
+        </span>
       </div>
 
       {/* 상태 라벨 (오른쪽 끝 작은 dot/text) */}

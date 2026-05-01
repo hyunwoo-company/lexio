@@ -70,21 +70,10 @@ export function CenterField({ lastPlay, lastPlayerName }: CenterFieldProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 14,
+        gap: 6,
         position: 'relative',
       }}
     >
-      <div
-        style={{
-          fontSize: 11,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: 'var(--fgg-gold-bright)',
-          fontWeight: 600,
-        }}
-      >
-        현재 필드
-      </div>
 
       {/* 부채꼴 fan으로 살짝 회전 (모바일 가로화면 fit을 위해 sm 사용) */}
       <div style={{ display: 'flex', gap: 4, padding: '4px 10px' }}>
@@ -104,28 +93,22 @@ export function CenterField({ lastPlay, lastPlayerName }: CenterFieldProps) {
 
       <div
         style={{
+          display: 'flex',
+          gap: 8,
+          alignItems: 'baseline',
           fontFamily: 'var(--fgg-font-display)',
-          fontSize: 18,
-          color: 'var(--fgg-text)',
-          letterSpacing: '0.04em',
+          letterSpacing: '0.02em',
         }}
       >
-        {COMBO_LABEL[lastPlay.type] ?? lastPlay.type}
+        <span style={{ fontSize: 14, color: 'var(--fgg-text)' }}>
+          {COMBO_LABEL[lastPlay.type] ?? lastPlay.type}
+        </span>
+        {lastPlayerName && (
+          <span style={{ fontSize: 11, color: 'var(--fgg-text-dim)' }}>
+            ◇ <span style={{ color: 'var(--fgg-gold-bright)', fontWeight: 600 }}>{lastPlayerName}</span>
+          </span>
+        )}
       </div>
-
-      {lastPlayerName && (
-        <div
-          style={{
-            fontSize: 12,
-            color: 'var(--fgg-text-dim)',
-            fontFamily: 'var(--fgg-font-display)',
-            letterSpacing: '0.02em',
-          }}
-        >
-          ◇ <span style={{ color: 'var(--fgg-gold-bright)', fontWeight: 600 }}>{lastPlayerName}</span>{' '}
-          <span style={{ color: 'var(--fgg-text-muted)' }}>가 냄</span>
-        </div>
-      )}
     </div>
   );
 }
