@@ -46,7 +46,10 @@ export interface MockSetup {
   state: ClientGameState;
 }
 
-export function buildMockGame(playerCount: 3 | 4 | 5): MockSetup {
+export function buildMockGame(
+  playerCount: 3 | 4 | 5,
+  options: { myTurn?: boolean; noLastPlay?: boolean } = {},
+): MockSetup {
   const myHand = HAND_BY_COUNT[playerCount];
   const tilesPerPlayer = playerCount === 4 ? 13 : 12;
 
@@ -62,10 +65,10 @@ export function buildMockGame(playerCount: 3 | 4 | 5): MockSetup {
   const state: ClientGameState = {
     phase: 'playing',
     players,
-    currentPlayerIndex: 1, // 두번째 플레이어 차례
-    lastPlay: SAMPLE_LAST_PLAY,
-    lastPlayerId: 'p2',
-    passCount: 1,
+    currentPlayerIndex: options.myTurn ? 0 : 1,
+    lastPlay: options.noLastPlay ? null : SAMPLE_LAST_PLAY,
+    lastPlayerId: options.noLastPlay ? null : 'p2',
+    passCount: options.noLastPlay ? 0 : 1,
     roundNumber: 3,
     firstPlayerId: 'p0',
   };

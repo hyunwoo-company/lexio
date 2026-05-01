@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import { GameBoard } from '@/components/game/GameBoard';
 import { buildMockGame } from '@/lib/mockGame';
@@ -12,11 +13,14 @@ interface PageProps {
 export default function TestPage({ params }: PageProps) {
   const raw = parseInt(params.count, 10);
   const playerCount = (raw === 3 || raw === 4 || raw === 5 ? raw : 4) as 3 | 4 | 5;
+  const search = useSearchParams();
+  const myTurn = search.get('turn') === 'me';
+  const noLastPlay = search.get('first') === '1';
   const { setRoom, setRoomInfo, setGameState } = useGameStore();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const { myId, roomId, state } = buildMockGame(playerCount);
+    const { myId, roomId, state } = buildMockGame(playerCount, { myTurn, noLastPlay });
 
     setRoom(roomId, myId, state.players[0].name);
     setRoomInfo({
@@ -27,7 +31,7 @@ export default function TestPage({ params }: PageProps) {
     });
     setGameState(state);
     setReady(true);
-  }, [playerCount, setRoom, setRoomInfo, setGameState]);
+  }, [playerCount, myTurn, noLastPlay, setRoom, setRoomInfo, setGameState]);
 
   if (!ready) {
     return (
