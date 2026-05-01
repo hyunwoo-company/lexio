@@ -268,14 +268,19 @@ export function LobbyScreen() {
       {/* ── Hero / 폼 ── */}
       <div
         className="flex flex-col items-center text-center"
-        style={{ marginBottom: 32, position: 'relative', zIndex: 1, animation: 'fgg-fade-up 700ms ease-out' }}
+        style={{
+          marginBottom: 'clamp(16px, 4vw, 32px)',
+          position: 'relative',
+          zIndex: 1,
+          animation: 'fgg-fade-up 700ms ease-out',
+        }}
       >
-        <LogoMark size={88} />
+        <LogoMark size={72} />
         <h1
           className="fgg-display"
           style={{
-            margin: '20px 0 6px',
-            fontSize: 64,
+            margin: 'clamp(12px, 3vw, 20px) 0 6px',
+            fontSize: 'clamp(44px, 11vw, 64px)',
             letterSpacing: '0.14em',
             color: 'var(--fgg-text)',
             background:

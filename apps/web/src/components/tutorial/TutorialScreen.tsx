@@ -127,7 +127,7 @@ function VisualSuits() {
           >
             <Tile
               tile={{ number: 7 as TileNumber, suit: s } as TileType}
-              size="md"
+              size="sm"
             />
             <div
               style={{
@@ -189,7 +189,7 @@ function VisualNumbers() {
           >
             <Tile
               tile={{ number: n as TileNumber, suit: 'sun' } as TileType}
-              size="md"
+              size="sm"
             />
             <span
               style={{
@@ -217,7 +217,7 @@ function VisualNumbers() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
           <Tile
             tile={{ number: 2 as TileNumber, suit: 'cloud' } as TileType}
-            size="md"
+            size="sm"
           />
           <span
             style={{
@@ -502,6 +502,7 @@ export function TutorialScreen() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           alignItems: 'start',
           padding: 'clamp(20px, 5vw, 40px) clamp(18px, 5vw, 60px)',
+          paddingBottom: 'calc(clamp(20px, 5vw, 40px) + 80px)' /* fixed footer 공간 */,
           gap: 'clamp(20px, 4vw, 60px)',
           maxWidth: 1200,
           margin: '0 auto',
@@ -541,7 +542,7 @@ export function TutorialScreen() {
         </div>
       </div>
 
-      {/* Footer nav */}
+      {/* Footer nav — viewport bottom 고정 */}
       <div
         style={{
           padding: 'clamp(12px, 3vw, 20px) clamp(14px, 4vw, 32px)',
@@ -551,8 +552,11 @@ export function TutorialScreen() {
           borderTop: '1px solid var(--fgg-line)',
           background: 'var(--fgg-bg-1)',
           gap: 12,
-          position: 'sticky',
+          position: 'fixed',
+          left: 0,
+          right: 0,
           bottom: 0,
+          zIndex: 10,
         }}
       >
         <button
