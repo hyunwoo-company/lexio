@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { useSocket } from '@/hooks/useSocket';
 import { PlayerSeat } from './PlayerSeat';
@@ -62,6 +62,16 @@ export function GameBoard() {
   const socket = useSocket();
   const [sortMode, setSortMode] = useState<'number' | 'suit'>('number');
 
+  // 모바일 브라우저 주소창 hide 트리거 — viewport 1px 스크롤로 hide 유도
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try {
+        window.scrollTo(0, 1);
+      } catch {/* noop */}
+    }, 150);
+    return () => window.clearTimeout(t);
+  }, []);
+
   if (!gameState || !myId || !roomId) return null;
 
   const playerCount = gameState.players.length as 3 | 4 | 5;
@@ -109,7 +119,8 @@ export function GameBoard() {
     <div
       className="fgg-felt"
       style={{
-        minHeight: '100dvh',
+        // 약간(2px) 더 크게 → 모바일 브라우저가 scroll 가능하다고 판단해 주소창 자동 hide
+        minHeight: 'calc(100dvh + 2px)',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -170,6 +181,7 @@ export function GameBoard() {
           position: 'relative',
           perspective: '700px',
           perspectiveOrigin: '50% 110%',
+          paddingRight: 64 /* 우측 ActionBar 영역 회피 — 모든 absolute 자식이 이 안쪽에 배치됨 */,
         }}
       >
         {/* Oval table — 진짜 3D 기울기로 카지노 테이블 시점 (앞 가까움, 뒤 멀어짐) */}
@@ -222,12 +234,12 @@ export function GameBoard() {
           />
         </div>
 
-        {/* 중앙 필드 (NeoTaco 위쪽 좌석 회피해서 약간 아래로) */}
+        {/* 중앙 필드 (perspective 시점에서 가까운 쪽 = 테이블 아래쪽 가운데) */}
         <div
           style={{
             position: 'absolute',
             left: '50%',
-            top: '58%',
+            top: '72%',
             transform: 'translate(-50%, -50%)',
             zIndex: 4,
           }}
