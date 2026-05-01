@@ -314,25 +314,9 @@ export function GuideScreen() {
           {HAND_RANKS.map((rank, i) => (
             <div
               key={rank.name}
-              className="fgg-panel"
-              style={{
-                padding: 18,
-                display: 'grid',
-                gridTemplateColumns: '60px 1fr auto',
-                alignItems: 'center',
-                gap: 18,
-              }}
+              className="fgg-panel fgg-combo-card"
             >
-              <div
-                className="fgg-display"
-                style={{
-                  fontSize: 36,
-                  color: 'var(--fgg-gold-bright)',
-                  textAlign: 'center',
-                  opacity: 0.65,
-                  fontStyle: 'italic',
-                }}
-              >
+              <div className="fgg-combo-card__num">
                 {String(i + 1).padStart(2, '0')}
               </div>
               <div>
@@ -371,14 +355,7 @@ export function GuideScreen() {
                   </div>
                 )}
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 4,
-                  justifyContent: 'flex-end',
-                  paddingBottom: 16,
-                }}
-              >
+              <div className="fgg-combo-card__tiles">
                 {rank.example.map((t, j) => (
                   <Tile
                     key={j}

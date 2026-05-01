@@ -92,6 +92,53 @@ body {
   background: rgba(212, 166, 86, 0.06) !important;
 }
 
+/* ===== Combo card — desktop grid / mobile stack ===== */
+.fgg-combo-card {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+}
+.fgg-combo-card__num {
+  font-size: 36px;
+  text-align: center;
+  color: var(--fgg-gold-bright);
+  opacity: 0.65;
+  font-style: italic;
+  font-family: var(--fgg-font-display);
+}
+.fgg-combo-card__tiles {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+@media (max-width: 640px) {
+  .fgg-combo-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+  .fgg-combo-card__num {
+    font-size: 22px;
+    text-align: left;
+    line-height: 1;
+    margin-bottom: -4px;
+  }
+  .fgg-combo-card__tiles {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin: 0 -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+    scrollbar-width: none;
+  }
+  .fgg-combo-card__tiles::-webkit-scrollbar { display: none; }
+}
+
 /* ===== FGG 타일 — 마작패 스타일 (아이보리 본체 + 그림자) ===== */
 .fgg-tile {
   position: relative;
