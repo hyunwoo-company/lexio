@@ -35,14 +35,49 @@ export function GameBoard() {
   const socket = useSocket();
   const [sortMode, setSortMode] = useState<'number' | 'suit'>('number');
 
-  // 모바일 브라우저 주소창 hide 트리거
+  // viewport 방향 감지 — 세로(portrait) / 가로(landscape) 둘 다 지원
+  const [isPortrait, setIsPortrait] = useState(false);
   useEffect(() => {
-    const t = window.setTimeout(() => {
+    const update = () => {
+      if (typeof window === 'undefined') return;
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
+  }, []);
+
+  // 모바일 브라우저 주소창 hide 트리거 — 여러 시점에서 시도
+  useEffect(() => {
+    const trigger = () => {
       try {
-        window.scrollTo(0, 1);
+        window.requestAnimationFrame(() => {
+          window.scrollTo(0, 1);
+        });
       } catch {/* noop */}
-    }, 150);
-    return () => window.clearTimeout(t);
+    };
+    trigger();
+    const timers = [
+      window.setTimeout(trigger, 50),
+      window.setTimeout(trigger, 250),
+      window.setTimeout(trigger, 800),
+    ];
+    const onOrientation = () => {
+      window.setTimeout(trigger, 100);
+      window.setTimeout(trigger, 500);
+    };
+    const onTouch = () => trigger();
+    window.addEventListener('orientationchange', onOrientation);
+    document.addEventListener('touchend', onTouch, { once: false, passive: true });
+    return () => {
+      timers.forEach((t) => window.clearTimeout(t));
+      window.removeEventListener('orientationchange', onOrientation);
+      document.removeEventListener('touchend', onTouch);
+    };
   }, []);
 
   // 턴 타이머 — 매 턴 시작 시 120초 reset, 0 도달 시 자동 pass
@@ -123,23 +158,6 @@ export function GameBoard() {
         overflow: 'hidden',
       }}
     >
-      {/* Portrait 안내 — 모바일 portrait에서만 표시 */}
-      <div className="fgg-portrait-warn">
-        <div className="fgg-portrait-warn__icon">📱</div>
-        <div
-          style={{
-            fontFamily: 'var(--fgg-font-display)',
-            fontSize: 24,
-            color: 'var(--fgg-gold-bright)',
-            letterSpacing: '0.04em',
-          }}
-        >
-          기기를 가로로 돌려주세요
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--fgg-text-dim)' }}>
-          FGG 게임은 가로 화면에서만 플레이 가능합니다.
-        </div>
-      </div>
       {/* 비네트 */}
       <div
         style={{
@@ -179,8 +197,8 @@ export function GameBoard() {
           position: 'relative',
           perspective: '700px',
           perspectiveOrigin: '50% 110%',
-          paddingLeft: 124 /* 좌측 상대 list (PlayerSeat 약 110~120px) 영역 회피 */,
-          paddingRight: 64 /* 우측 ActionBar 영역 회피 */,
+          paddingLeft: isPortrait ? 100 : 124 /* 좌측 상대 list 영역 회피 */,
+          paddingRight: isPortrait ? 60 : 64 /* 우측 ActionBar 영역 회피 */,
         }}
       >
         {/* Oval table — 진짜 3D 기울기로 카지노 테이블 시점 (앞 가까움, 뒤 멀어짐) */}
@@ -328,8 +346,13 @@ export function GameBoard() {
           )}
         </div>
 
-        {/* 손패 */}
-        <PlayerHand hand={(me?.hand ?? []) as Tile[]} isMyTurn={isMyTurn} sortMode={sortMode} />
+        {/* 손패 — portrait에서는 2~3줄로 wrap */}
+        <PlayerHand
+          hand={(me?.hand ?? []) as Tile[]}
+          isMyTurn={isMyTurn}
+          sortMode={sortMode}
+          isPortrait={isPortrait}
+        />
       </div>
 
       {/* 에러 토스트 */}

@@ -95,33 +95,17 @@ body {
   background: rgba(212, 166, 86, 0.06) !important;
 }
 
-/* ===== Portrait → landscape 안내 (게임 화면 한정) ===== */
-.fgg-portrait-warn {
-  display: none;
-}
-@media (orientation: portrait) and (max-width: 900px) {
-  .fgg-portrait-warn {
-    display: flex;
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: var(--fgg-bg-0);
-    color: var(--fgg-text);
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 32px;
-    text-align: center;
+/* ===== Portrait/Landscape 둘 다 지원 — 회전 안내 더 이상 사용 안 함 ===== */
+/* (구 .fgg-portrait-warn 스타일 제거됨) */
+
+/* iOS safe-area 대응 — viewport-fit: cover와 함께 사용 */
+@supports (padding: env(safe-area-inset-top)) {
+  .fgg-felt {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
   }
-  .fgg-portrait-warn__icon {
-    font-size: 56px;
-    animation: fgg-rotate-hint 2.4s ease-in-out infinite;
-  }
-}
-@keyframes fgg-rotate-hint {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(90deg); }
 }
 
 /* ===== Combo card — desktop grid / mobile stack ===== */

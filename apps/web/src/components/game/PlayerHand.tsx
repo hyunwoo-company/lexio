@@ -14,6 +14,7 @@ import {
   SortableContext,
   arrayMove,
   horizontalListSortingStrategy,
+  rectSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -26,6 +27,7 @@ interface PlayerHandProps {
   hand: TileType[];
   isMyTurn: boolean;
   sortMode?: 'number' | 'suit';
+  isPortrait?: boolean;
 }
 
 function SortableTile({
@@ -62,7 +64,7 @@ function SortableTile({
   );
 }
 
-export function PlayerHand({ hand, isMyTurn, sortMode = 'number' }: PlayerHandProps) {
+export function PlayerHand({ hand, isMyTurn, sortMode = 'number', isPortrait = false }: PlayerHandProps) {
   const { selectedTileIds, toggleTile, customHandOrder, setCustomHandOrder } = useGameStore();
 
   // 자동 정렬 (sortMode 기준)
@@ -136,15 +138,19 @@ export function PlayerHand({ hand, isMyTurn, sortMode = 'number' }: PlayerHandPr
       }}
     >
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={display.map((t) => t.id)} strategy={horizontalListSortingStrategy}>
+        <SortableContext
+          items={display.map((t) => t.id)}
+          strategy={isPortrait ? rectSortingStrategy : horizontalListSortingStrategy}
+        >
           <div
             style={
               {
                 display: 'flex',
-                flexWrap: 'nowrap',
-                overflowX: 'auto',
+                flexWrap: isPortrait ? 'wrap' : 'nowrap',
+                overflowX: isPortrait ? 'visible' : 'auto',
                 overflowY: 'visible',
                 gap: 4,
+                rowGap: isPortrait ? 8 : 4,
                 // 위쪽 padding 충분히 → 선택/추천 lift(-10~-12px) 시 잘림 방지
                 padding: '18px 12px 6px',
                 maxWidth: '100vw',
@@ -152,6 +158,7 @@ export function PlayerHand({ hand, isMyTurn, sortMode = 'number' }: PlayerHandPr
                 scrollbarWidth: 'none',
                 WebkitOverflowScrolling: 'touch',
                 alignItems: 'flex-end',
+                justifyContent: isPortrait ? 'center' : 'flex-start',
               } as React.CSSProperties
             }
           >
