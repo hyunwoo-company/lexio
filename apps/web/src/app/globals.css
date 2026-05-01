@@ -43,15 +43,18 @@ body {
   @apply bg-gray-950 text-white;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
-  /* touch-action: manipulation 제거 — vertical scroll 막아서 모바일에서 가이드/튜토리얼 스크롤 차단됨.
-     게임 화면(GameBoard)은 자체 .fgg-felt 컨테이너에서 필요시 별도 적용. */
   background: var(--fgg-bg-0);
   color: var(--fgg-text);
-  /* 사신수 floating absolute(left:-4%, right:-4%)으로 인한 horizontal scroll 방지 */
-  overflow-x: hidden;
+  /* overflow-x: hidden 단독은 일부 브라우저에서 overflow-y도 강제 hidden 처리 → vertical scroll 차단됨.
+     overflow-y: auto 명시해서 vertical 스크롤 보장 */
+  overflow-x: clip;
+  overflow-y: auto;
 }
 
-html { overflow-x: hidden; }
+html {
+  overflow-x: clip;
+  overflow-y: auto;
+}
 
 * {
   -webkit-overflow-scrolling: touch;

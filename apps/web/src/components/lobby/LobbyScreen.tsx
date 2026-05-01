@@ -232,7 +232,7 @@ export function LobbyScreen() {
         style={{
           position: 'absolute',
           top: '50%',
-          left: '-4%',
+          left: '0%',
           width: 'min(34vmin, 260px)',
           opacity: 0.14,
           filter: 'blur(0.5px) saturate(0.85)',
@@ -254,7 +254,7 @@ export function LobbyScreen() {
         style={{
           position: 'absolute',
           top: '50%',
-          right: '-4%',
+          right: '0%',
           width: 'min(28vmin, 220px)',
           opacity: 0.16,
           filter: 'blur(0.5px) saturate(0.85)',
