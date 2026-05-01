@@ -6,9 +6,9 @@ import { Tile } from '@/components/tile/Tile';
 
 const SASIN: Record<Suit, { name: string; color: string }> = {
   sun: { name: '주작', color: '#C8323D' },
-  moon: { name: '현무', color: '#3A5A8C' },
+  moon: { name: '현무', color: '#2A8C56' },
   star: { name: '백호', color: '#D88438' },
-  cloud: { name: '청룡', color: '#2A8C56' },
+  cloud: { name: '청룡', color: '#3A5A8C' },
 };
 
 type ExampleTile = { number: TileNumber; suit: Suit };
@@ -415,7 +415,7 @@ export function GuideScreen() {
             },
             {
               title: '첫 선 (先)',
-              body: '가장 약한 타일인 현무 2(cloud-2) 보유자가 첫 선이 됩니다.',
+              body: '가장 약한 타일인 청룡 2(cloud-2) 보유자가 첫 선이 됩니다.',
             },
           ].map((s) => (
             <div

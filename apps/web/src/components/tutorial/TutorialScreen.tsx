@@ -7,9 +7,9 @@ import { Tile } from '@/components/tile/Tile';
 
 const SASIN: Record<Suit, { name: string; color: string }> = {
   sun: { name: '주작', color: '#C8323D' },
-  moon: { name: '현무', color: '#3A5A8C' },
+  moon: { name: '현무', color: '#2A8C56' },
   star: { name: '백호', color: '#D88438' },
-  cloud: { name: '청룡', color: '#2A8C56' },
+  cloud: { name: '청룡', color: '#3A5A8C' },
 };
 
 type Step = {

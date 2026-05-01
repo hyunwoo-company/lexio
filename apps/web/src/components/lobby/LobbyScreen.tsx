@@ -156,7 +156,7 @@ export function LobbyScreen() {
         overflow: 'hidden',
       }}
     >
-      {/* ── 사신수 floating background — 동서남북 ── */}
+      {/* ── 사신수 floating background — 동서남북, vmin으로 적응형 ── */}
       {/* 위 (북): 현무 — 水/陰 */}
       <img
         src="/sasinsoo/hyunmu.png"
@@ -167,8 +167,8 @@ export function LobbyScreen() {
           position: 'absolute',
           top: '4%',
           left: '50%',
-          width: 240,
-          opacity: 0.18,
+          width: 'min(28vmin, 220px)',
+          opacity: 0.16,
           filter: 'blur(0.5px) saturate(0.85)',
           mixBlendMode: 'screen',
           ['--tx' as string]: '-50%',
@@ -189,8 +189,8 @@ export function LobbyScreen() {
           position: 'absolute',
           bottom: '4%',
           left: '50%',
-          width: 240,
-          opacity: 0.16,
+          width: 'min(28vmin, 220px)',
+          opacity: 0.14,
           filter: 'blur(0.5px) saturate(0.95)',
           mixBlendMode: 'screen',
           ['--tx' as string]: '-50%',
@@ -210,9 +210,9 @@ export function LobbyScreen() {
         style={{
           position: 'absolute',
           top: '50%',
-          left: '2%',
-          width: 280,
-          opacity: 0.16,
+          left: '-4%',
+          width: 'min(34vmin, 260px)',
+          opacity: 0.14,
           filter: 'blur(0.5px) saturate(0.85)',
           mixBlendMode: 'screen',
           ['--tx' as string]: '0',
@@ -232,9 +232,9 @@ export function LobbyScreen() {
         style={{
           position: 'absolute',
           top: '50%',
-          right: '2%',
-          width: 240,
-          opacity: 0.18,
+          right: '-4%',
+          width: 'min(28vmin, 220px)',
+          opacity: 0.16,
           filter: 'blur(0.5px) saturate(0.85)',
           mixBlendMode: 'screen',
           ['--tx' as string]: '0',
@@ -250,14 +250,14 @@ export function LobbyScreen() {
       <div
         style={{
           position: 'absolute',
-          top: '38%',
+          top: '40%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 480,
-          height: 480,
+          width: 'min(80vmin, 480px)',
+          height: 'min(80vmin, 480px)',
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(242,200,120,0.28) 0%, rgba(212,166,86,0.10) 35%, transparent 70%)',
+            'radial-gradient(circle, rgba(242,200,120,0.24) 0%, rgba(212,166,86,0.08) 35%, transparent 70%)',
           animation: 'fgg-glow-pulse 5s ease-in-out infinite',
           pointerEvents: 'none',
           zIndex: 0,
