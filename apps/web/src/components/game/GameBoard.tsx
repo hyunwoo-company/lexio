@@ -11,40 +11,13 @@ import { ActionBar } from './ActionBar';
 import { ScoreBoard } from './ScoreBoard';
 import type { ClientPlayer, Tile } from '@lexio/game-logic';
 
-// 사람 수별 좌석 위치 (% 단위, 절대좌표) + anchor (좌석을 viewport 안쪽으로 정렬해 잘림 방지)
-// 0번 = me (항상 하단 중앙). 1번~ = 시계방향(왼쪽 → 위 → 오른쪽)으로 상대들 배치.
-type SeatAnchor = 'top' | 'bottom' | 'left' | 'right';
-
-const SEAT_LAYOUTS: Record<3 | 4 | 5, { x: number; y: number; anchor: SeatAnchor }[]> = {
-  3: [
-    { x: 50, y: 88, anchor: 'bottom' },
-    { x: 4,  y: 28, anchor: 'left' },
-    { x: 96, y: 28, anchor: 'right' },
-  ],
-  4: [
-    { x: 50, y: 88, anchor: 'bottom' },
-    { x: 4,  y: 38, anchor: 'left' },
-    { x: 50, y: 26, anchor: 'top' },
-    { x: 96, y: 38, anchor: 'right' },
-  ],
-  5: [
-    { x: 50, y: 88, anchor: 'bottom' },
-    { x: 4,  y: 48, anchor: 'left' },
-    { x: 26, y: 22, anchor: 'top' },
-    { x: 74, y: 22, anchor: 'top' },
-    { x: 96, y: 48, anchor: 'right' },
-  ],
+// 상대 좌석을 좌측 vertical list로 배치 (루미큐브 스타일)
+// 0번 = me (하단 중앙, 별도 처리). 1번~ = 좌측에 위→아래로 list.
+const RIVAL_VERTICAL_POSITIONS: Record<3 | 4 | 5, number[]> = {
+  3: [22, 62],            // 상대 2명: 위·아래
+  4: [16, 46, 76],        // 상대 3명: 위·중·아래
+  5: [12, 36, 60, 84],    // 상대 4명: 4분할
 };
-
-function transformForAnchor(anchor: SeatAnchor): string {
-  switch (anchor) {
-    case 'left':   return 'translate(0, -50%)';
-    case 'right':  return 'translate(-100%, -50%)';
-    case 'top':    return 'translate(-50%, 0)';
-    case 'bottom':
-    default:       return 'translate(-50%, -50%)';
-  }
-}
 
 // 내 자리(0번) 다음부터 시계방향으로 상대 배치 — gameState.players의 순서를 좌석 인덱스에 매핑
 function makeSeatedPlayers(players: ClientPlayer[], myId: string): { player: ClientPlayer; seatIdx: number }[] {
@@ -75,7 +48,7 @@ export function GameBoard() {
   if (!gameState || !myId || !roomId) return null;
 
   const playerCount = gameState.players.length as 3 | 4 | 5;
-  const seats = SEAT_LAYOUTS[playerCount] ?? SEAT_LAYOUTS[4];
+  const rivalYs = RIVAL_VERTICAL_POSITIONS[playerCount] ?? RIVAL_VERTICAL_POSITIONS[4];
   const seated = makeSeatedPlayers(gameState.players, myId);
   const me = gameState.players.find((p) => p.id === myId);
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
@@ -173,7 +146,7 @@ export function GameBoard() {
         roomCode={roomId}
       />
 
-      {/* Oval 테이블 + 좌석 + 중앙필드를 담는 메인 영역 */}
+      {/* Oval 테이블 + 중앙필드를 담는 메인 영역 — 좌측 상대 list / 우측 ActionBar 회피 */}
       <div
         style={{
           flex: 1,
@@ -181,7 +154,8 @@ export function GameBoard() {
           position: 'relative',
           perspective: '700px',
           perspectiveOrigin: '50% 110%',
-          paddingRight: 64 /* 우측 ActionBar 영역 회피 — 모든 absolute 자식이 이 안쪽에 배치됨 */,
+          paddingLeft: 124 /* 좌측 상대 list (PlayerSeat 약 110~120px) 영역 회피 */,
+          paddingRight: 64 /* 우측 ActionBar 영역 회피 */,
         }}
       >
         {/* Oval table — 진짜 3D 기울기로 카지노 테이블 시점 (앞 가까움, 뒤 멀어짐) */}
@@ -247,34 +221,36 @@ export function GameBoard() {
           <CenterField lastPlay={gameState.lastPlay} lastPlayerName={lastPlayerName} />
         </div>
 
-        {/* 상대 좌석들 (내 자리 0번은 하단 hand 섹션이 대신함) */}
-        {seated.map(({ player, seatIdx }) => {
-          if (seatIdx === 0) return null; // 내 자리는 별도
-          const seat = seats[seatIdx];
-          if (!seat) return null;
-          const isTurn = currentPlayer?.id === player.id;
-          return (
-            <div
-              key={player.id}
-              style={{
-                position: 'absolute',
-                left: `${seat.x}%`,
-                top: `${seat.y}%`,
-                transform: transformForAnchor(seat.anchor),
-                zIndex: 5,
-              }}
-            >
-              <PlayerSeat
-                player={player}
-                isMe={false}
-                isTurn={isTurn}
-                size="sm"
-                showFan={true}
-              />
-            </div>
-          );
-        })}
       </div>
+
+      {/* 좌측 상대 list — viewport 좌측 column에 vertical 배치 (루미큐브 스타일) */}
+      {seated.map(({ player, seatIdx }) => {
+        if (seatIdx === 0) return null;
+        const rivalIdx = seatIdx - 1;
+        const y = rivalYs[rivalIdx];
+        if (y === undefined) return null;
+        const isTurn = currentPlayer?.id === player.id;
+        return (
+          <div
+            key={player.id}
+            style={{
+              position: 'absolute',
+              left: 6,
+              top: `${y}%`,
+              transform: 'translateY(-50%)',
+              zIndex: 7,
+            }}
+          >
+            <PlayerSeat
+              player={player}
+              isMe={false}
+              isTurn={isTurn}
+              size="sm"
+              showFan={true}
+            />
+          </div>
+        );
+      })}
 
       {/* 우측 액션 패널 — 루미큐브 스타일 vertical (viewport 우측 가운데) */}
       <div
