@@ -1,215 +1,264 @@
-# FGG (Four Guardian Gods) 게임 만들기
+# FGG (Four Guardian Gods)
 
-> 기존 LEXIO 게임에서 사신수(주작/청룡/백호/현무) 테마 + 1이 최강 룰로 리브랜딩됨.
-
-@RULES.md 를 참고해서 게임을 만들려고해.
-앱으로 하게되면 flutter를 통해 진행할거야
-
-추가적으로 게임룰에 대해 잘 모르겠으면 notebooklm mcp를 통해서 lexio 프로젝트를 보고 룰에 대해 확인해봐
+> 사신수(주작·청룡·백호·현무) 테마 + 1이 최강 룰의 온라인 멀티플레이 보드게임.
+> 모바일 우선 + 데스크탑 호환.
 
 ---
 
-## 프로젝트 현황
+## 게임 룰
 
-### 아키텍처
-- **모노레포**: Turborepo + pnpm workspaces
-- **패키지 매니저**: pnpm
-- **플랫폼**: 웹(Next.js) + 앱(Flutter) 동시 지원, 동일 서버에 연결해 크로스 플레이 가능
+### 타일 구성
+- 4가지 사신수 문양 × 1~15 숫자 = 최대 60장
+- 사신수 매핑: **주작**(火/南) > **현무**(水/北) > **백호**(金/西) > **청룡**(木/東)
 
-### 구조
+### 숫자 서열
+**1 > 15 > 14 > 13 > … > 4 > 3 > 2** — 1이 최강 ace, 2가 최약.
+
+### 게임 모드 (방 만들기 시 선택)
+| 모드 | 3인 | 4인 | 5인 |
+|---|---|---|---|
+| **기본** (recommended) | 1~9, 12장씩 | 1~13, 13장씩 | 1~15, 12장씩 |
+| **전체** (full) | 1~15, 20장씩 | 1~15, 15장씩 | 1~15, 12장씩 |
+
+### 첫 선
+**청룡 2** (cloud-2, 가장 약한 타일) 보유자가 시작.
+
+### 낼 수 있는 조합
+- 1개 (싱글) / 2개 (페어) / 3개 (트리플) / 5개 (5장 콤보)
+- **4개 절대 불가**
+
+### 5장 콤보 족보 (낮음 → 높음)
+1. 스트레이트 (연속 5장)
+2. 플러시 (같은 사신수 5장)
+3. 풀하우스 (트리플 + 페어)
+4. 포카드 (같은 숫자 4장 + 1장)
+5. 스트레이트플러시 (연속 + 같은 사신수)
+
+### 스트레이트 특수 룰
+- **Ace high**: `12-13-14-15-1` 같이 1이 maxNumber 뒤에 (ace 최강)
+- **Ace low**: `1-2-3-4-5` 도 valid (1을 가장 약한 위치로 두는 특수 케이스)
+- **강도 비교**: ace high > 일반 > ace low (둘 다 1이 포함되지만, ace high의 next-best=15가 ace low의 next-best=5보다 강함)
+
+### 동일 콤보 비교
+- 같은 숫자 페어/트리플/스트레이트 → max 카드의 **사신수 문양**으로 tie-break
+- 문양 서열: 주작 > 현무 > 백호 > 청룡
+
+### 점수 계산
+- 라운드 종료 시 남은 타일 개수 차이만큼 칩 교환
+- **숫자 1 보유 시 페널티**: 남은 패 × 2^n (1개 ×2, 2개 ×4, 3개 ×8)
+
+### 턴 진행
+- 각 턴 **2분 제한**, 0초 도달 시 자동 패스
+- 라운드 헤더 아래 진행 바 + 남은 시간 표시 (15초 이하 진홍 강조)
+
+---
+
+## 아키텍처
+
+### 모노레포 (Turborepo + pnpm workspaces)
+
 ```
-fgg/
+fgg-game/
 ├── packages/
-│   └── game-logic/        # TypeScript 핵심 게임 로직 (서버와 공유)
+│   └── game-logic/        # TypeScript 핵심 게임 로직 (서버와 공유, Jest 42개 테스트)
 ├── apps/
 │   ├── server/            # Node.js + Socket.io 백엔드 (포트 3001)
-│   ├── web/               # Next.js 14 프론트엔드 (포트 3000)
-│   └── flutter/           # Flutter 앱 (진행 예정)
-├── RULES.md
-├── TODOLIST.md
+│   ├── web/               # Next.js 14 프론트엔드 (포트 3000 / 개발: 3010)
+│   └── flutter/           # Flutter 3.x 앱 (Dart로 게임 로직 재구현)
+├── RULES.md               # 원본 룰 (참고용)
 └── README.md
 ```
 
-### 완료된 작업
-- [x] Turborepo 모노레포 초기화
-- [x] `packages/game-logic` — 게임 로직 코어 구현 (36개 테스트 통과)
-  - 타일 서열 비교 (2 > 1 > 15 > ... > 3 / 해 > 달 > 별 > 구름)
-  - 조합 판별: 싱글/페어/트리플/스트레이트/플러시/풀하우스/포카드/스트레이트플러시
-  - 스트레이트 1·2 예외 처리
-  - 점수 계산 (숫자 2 보유 시 2^n 배 페널티)
-- [x] `apps/server` — Node.js + Socket.io 백엔드
-  - 방 생성/입장/퇴장, 게임 진행, 점수 정산
-  - 서버 권위(Server Authoritative) 모델 — 부정행위 방지
-- [x] `apps/web` — Next.js 웹 UI
-  - 로비 화면 (방 만들기/입장)
-  - 대기실 (플레이어 목록, 게임 시작)
-  - 게임 보드 (손패, 상대 패, 중앙 플레이 영역, 내기/패스)
-  - 라운드 종료 점수판
-- [x] `apps/flutter` — Flutter 3.38.7 앱
-  - Dart로 게임 로직 재구현 (lib/game/)
-  - Socket.io 연결 (socket_io_client)
-  - 상태 관리 (flutter_riverpod)
-  - 라우팅 (go_router)
-  - 로비/대기실/게임/점수 화면 완성
-- [x] **배포 완료**
-  - 웹: Vercel (`https://lexio-web-inky.vercel.app`)
-  - 백엔드: hw-01 K8s (k3s) + ArgoCD GitOps + **Tailscale Funnel**
-  - 서버 공개 URL: `https://hyunwoo-am02.tail3d6bb4.ts.net`
-  - GitHub Actions로 GHCR 이미지 자동 빌드/푸시 → ArgoCD 자동 배포
+### 기술 스택
 
-### 진행 예정
-- [ ] 통합 테스트 (웹 ↔ Flutter 크로스 플레이)
-- [ ] 앱 스토어 배포 (선택)
-- [ ] 도메인 취득 후 Cloudflare Tunnel 전환 (아래 마이그레이션 가이드 참고)
+**공통**: TypeScript 5.x · pnpm · Turborepo
+
+**백엔드 (`apps/server`)**: Node.js · Express · Socket.io 4.x · ts-node-dev
+
+**웹 (`apps/web`)**:
+- Next.js 14 App Router · TailwindCSS · Zustand · Socket.io-client
+- `@dnd-kit/core` + `@dnd-kit/sortable` (손패 드래그 정렬)
+- 모바일 우선 (가로화면 게임, 세로화면 메뉴)
+
+**앱 (`apps/flutter`)**: Flutter 3.x · Dart · socket_io_client · Riverpod · go_router
+
+### 서버 권위(Server Authoritative) 모델
+- 클라이언트는 입력만 보내고, 게임 로직은 서버에서 검증/실행
+- 클라이언트 측 즉시 검증(`detectCombination` + `canPlay`)은 UX용 (server roundtrip 전 즉각 피드백)
+- 부정행위 방지
 
 ---
 
-## 기술 스택
+## 화면 라우트
 
-### 공통
-- TypeScript 5.x, pnpm, Turborepo
+| 라우트 | 화면 | 비고 |
+|---|---|---|
+| `/` | 로비 (닉네임 + 방 만들기/입장 + 모드 선택) | 사신수 floating + 카지노 골드 톤 |
+| `/room/[roomId]` | 대기실 + 게임 보드 + 점수판 | gameState.phase에 따라 자동 전환 |
+| `/guide` | 족보 가이드 (8 콤보 + 서열) | |
+| `/tutorial` | 6-step 튜토리얼 | |
+| `/test/[count]` | mock 게임 화면 (3/4/5인) | **dev/localhost 전용** (middleware로 production 차단) |
 
-### 백엔드 (apps/server)
-- Node.js, Express, Socket.io 4.x, ts-node-dev
+### `/test` 옵션
+- `?turn=me` — 내 차례 시작
+- `?first=1` — 첫 선 (lastPlay 없음)
 
-### 웹 프론트엔드 (apps/web)
-- Next.js 14 App Router, TailwindCSS, Zustand, Framer Motion, Socket.io-client
+---
 
-### 앱 (apps/flutter)
-- Flutter 3.x, Dart, socket_io_client, Riverpod
-- **테스트**: Patrol 4.x + Patrol MCP (`patrol`, `patrol_mcp` dev dependency)
+## 모바일 게임 화면 layout (가로 모드)
+
+```
+┌──────────────────────────────────────┬──┐
+│        ROUND 3 · 용현 차례 · #FGG     │↕ │ 정렬
+│        ▓▓▓▓▓▓░░░░░ 78s              │  │
+│ ┌──────┐                              │숫│
+│ │ 용현 │       ╭─────────────╮       │자│
+│ │🀫13  │      │              │       │  │
+│ │💰14  │      │   Oval (3D   │       │💡│ 추천
+│ └──────┘      │   perspective │       │  │
+│ ┌──────┐      │   카지노 펠트)│       │  │
+│ │NeoTaco│     │              │       │패│ 패스
+│ │🀫13   │     │   9   9      │       │스│
+│ │💰22   │     │   페어 ◇     │       │  │
+│ └──────┘      │   NeoTaco    │       │✓ │ 내기
+│ ┌──────┐     ╰─────────────╯        │  │
+│ │ Mira │                              │  │
+│ │🀫13  │                              │  │
+│ │💰31  │                              │  │
+│ └──────┘                              │  │
+├──────────────────────────────────────┴──┤
+│  나 🀫13 💰28                            │
+│  [2][3][4][5][6][7][9][9][11][13][13][1][1] │ ← long-press drag로 정렬
+└──────────────────────────────────────────┘
+```
+
+- **좌측**: 상대 정보 list (닉네임 / 🀫 패개수 / 💰 코인) — 컴팩트, 차례면 골드 ring + glow
+- **가운데**: oval 테이블 (3D rotateX 58deg perspective) + 마지막 낸 패 + 콤보 라벨 + 누가 냈는지
+- **우측 vertical 패널**: 정렬(숫자/문양) / 추천 💡 / 패스 / **체크 ✓** (내기)
+- **하단**: 내 정보 + 손패 (sm size, 13장 가로 정렬, dnd-kit drag로 순서 변경)
+- **portrait 모드**: 자동 회전 안내 모달 표시 (게임 화면 한정)
 
 ---
 
 ## 배포 인프라
 
 ### 현재 구성
-
 ```
-[사용자]
-    │ HTTPS
-    ▼
-[Vercel] ─── lexio-web-inky.vercel.app
-    │ NEXT_PUBLIC_SERVER_URL
-    ▼ WebSocket
-[Tailscale Funnel] ─── hyunwoo-am02.tail3d6bb4.ts.net
-    │ localhost:30001
-    ▼
-[hw-01 K8s] NodePort 30001
-    └── lexio Pod (ghcr.io/hyunwoo-company/lexio-server)
+[사용자] HTTPS
+   ↓
+[Vercel] fgg-game.vercel.app (Next.js)
+   ↓ NEXT_PUBLIC_SERVER_URL (WSS)
+[Tailscale Funnel] hyunwoo-am02.tail3d6bb4.ts.net
+   ↓ NodePort 30001
+[hw-01 K8s (k3s)] fgg-api Pod
 ```
 
-- **웹**: Vercel (`https://lexio-web-inky.vercel.app`)
-- **백엔드 공개 URL**: `https://hyunwoo-am02.tail3d6bb4.ts.net` (Tailscale Funnel)
-- **K8s 서비스**: NodePort 30001 → Pod 3001
-- **GitOps**: `hyunwoo-company/k8s-helm` → ArgoCD 자동 배포
-- **이미지**: GitHub Actions가 `main` 푸시 시 `ghcr.io/hyunwoo-company/lexio-server:latest` 자동 빌드
-- **Tailscale Funnel**: hw-01에서 `sudo tailscale funnel --bg http://localhost:30001` 실행 (재시작 후 자동 유지)
+| 항목 | 값 |
+|---|---|
+| Web 호스트 | Vercel `fgg-game.vercel.app` |
+| 서버 호스트 | hw-01 K8s (k3s, Tailscale `100.80.145.71`) |
+| 서버 공개 URL | `https://hyunwoo-am02.tail3d6bb4.ts.net` (Tailscale Funnel) |
+| K8s 서비스 | NodePort 30001 → Pod 3001 |
+| GitOps | `hyunwoo-company/k8s-helm` (`apps/fgg-api/`) → ArgoCD 자동 배포 |
+| 이미지 | `ghcr.io/hyunwoo-company/fgg-server` (sha-XXXXXXX 자동 태그) |
+| ArgoCD | `https://100.80.145.71:30443` |
+
+### CI/CD 파이프라인
+1. `apps/server/**` 또는 `packages/game-logic/**` 변경 push
+2. GitHub Actions(`fgg-game/.github/workflows/build-server.yml`):
+   - `build-and-push` job: GHCR에 `fgg-server:sha-XXXXXXX` + `latest` 빌드/푸시
+   - `update-helm-chart` job: `k8s-helm` repo의 `apps/fgg-api/values.yaml` `image.tag`를 SHA로 갱신·commit·push (`HELM_REPO_TOKEN` secret 사용)
+3. ArgoCD가 git diff 감지 → Pod 자동 재배포
 
 ### 도메인 취득 시 → Cloudflare Tunnel 전환 가이드
-
-Cloudflare Zero Trust 대시보드에 `lexio` 터널은 이미 생성되어 있음. 도메인 구매 후 아래 순서로 전환.
-
-#### 1. Cloudflare Zero Trust에서 Public Hostname 추가
-- Zero Trust → Networks → Tunnels → `lexio` 터널 → Public Hostnames
-- Subdomain: `api` (또는 원하는 값), Domain: 구매한 도메인
-- Service: `http://lexio:3001` (K8s 서비스 내부 주소)
-
-#### 2. cloudflared 토큰 Secret 생성 (hw-01에서)
-```bash
-kubectl create secret generic cloudflared-token \
-  --from-literal=token=<CLOUDFLARE_TUNNEL_TOKEN> \
-  -n lexio
-```
-
-#### 3. k8s-helm values.yaml 수정
-```yaml
-service:
-  type: ClusterIP   # NodePort에서 변경
-  port: 3001
-
-cloudflared:
-  enabled: true
-  image: cloudflare/cloudflared:latest
-```
-
-#### 4. Vercel 환경변수 업데이트
-- `NEXT_PUBLIC_SERVER_URL` → `https://api.your-domain.com`
-- Vercel Redeploy 실행
-
-#### 5. Tailscale Funnel 비활성화 (hw-01에서)
-```bash
-tailscale funnel off
-```
+1. Cloudflare Zero Trust → Public Hostname 추가 (Service: `http://fgg-api:3001`)
+2. `kubectl create secret generic cloudflared-token --from-literal=token=<TOKEN> -n lexio`
+3. `k8s-helm/apps/fgg-api/values.yaml`: service.type ClusterIP, cloudflared.enabled: true
+4. Vercel `NEXT_PUBLIC_SERVER_URL` → 새 도메인
+5. `tailscale funnel off` (hw-01)
 
 ---
 
-## E2E 테스트 전략
+## 개발 워크플로
 
-멀티플레이어 실시간 게임이므로 3개 레이어로 나눠 검증한다.
+### 로컬 개발
+```bash
+# game-logic 테스트
+cd packages/game-logic && pnpm test
 
-### 레이어 1 — 게임 로직 단위 테스트 ✅ (완료)
-- 위치: `packages/game-logic/`
-- 실행: `pnpm test`
-- 커버: 타일 서열, 조합 판별, 점수 계산 (36개 테스트)
+# 서버 dev (3001)
+pnpm --filter @fgg/server dev   # 또는 @lexio/server (구 패키지 이름)
 
-### 레이어 2 — 서버 멀티플레이어 E2E (봇 스크립트)
-- 위치: `apps/server/test/e2e_bot_test.ts`
-- 실행: `ts-node apps/server/test/e2e_bot_test.ts` (서버가 3001 포트에서 실행 중이어야 함)
-- 커버: 3개 봇 클라이언트로 실제 소켓 연결 → 방 생성/입장 → 게임 시작 → 1라운드 완주 검증
-- 이유: 멀티플레이어 게임 플로우와 실시간 상태 동기화는 단일 클라이언트 UI 테스트로 검증 불가
-
-### 레이어 3 — Flutter UI E2E (Patrol + MCP)
-- 위치: `apps/flutter/integration_test/`
-- 실행: `patrol test --target integration_test/patrol_test.dart`
-- 커버: 로비 화면 UI 플로우, 단일 클라이언트 상호작용
-- 게임 상태(game:stateSync 이벤트)는 Mock 주입으로 검증
-- MCP: `.mcp.json` 설정으로 Claude가 Patrol 도구를 직접 실행·디버깅 가능
-
-### Patrol MCP 설정
-- 런처 스크립트: `.claude/run-patrol` (sh, Git Bash 호환)
-- MCP 설정 파일: `.mcp.json` (프로젝트 루트, Claude Code 자동 감지)
-- `PROJECT_ROOT=./apps/flutter` — Flutter 서브디렉토리 지정
-- patrol_cli 전역 설치 필요: `dart pub global activate patrol_cli 4.3.1`
-- patrol_cli PATH 추가 필요: `C:\Users\hyunwoo\AppData\Local\Pub\Cache\bin`
-
-### 테스트 파일 구조
+# 웹 dev — IPv4 명시 (chrome MCP 호환)
+cd apps/web && pnpm exec next dev -p 3010 -H 0.0.0.0
 ```
-apps/
-├── flutter/
-│   └── integration_test/
-│       ├── patrol_test.dart          # 진입점 (모든 테스트 묶음)
-│       └── tests/
-│           ├── lobby_test.dart       # 로비 UI 플로우
-│           └── room_test.dart        # 대기실/게임 화면 (TODO: 확장)
-└── server/
-    └── test/
-        └── e2e_bot_test.ts           # 멀티플레이어 봇 E2E
 
-```
+### 알려진 이슈
+- **Next.js 14 dev hot reload chunk 누락** — Windows + pnpm symlink 환경에서 자주 발생.
+  변경 후 페이지 안 뜨면 `.next` 삭제 + dev 재시작.
+- **dev tools 모바일 시뮬 input 한계** — 마우스 wheel은 안 통하고 마우스 누른 채 드래그만 동작. 실제 디바이스에선 정상.
+
+### 게임룰 검증 위치
+- `packages/game-logic/__tests__/` — 단위 테스트 42개
+- `packages/game-logic/src/validator.ts` — `detectCombination`
+- `packages/game-logic/src/canPlay.ts` — 위계 비교
+- `packages/game-logic/src/scorer.ts` — 점수 계산
+- `apps/server/src/game/GameEngine.ts` — 서버 측 게임 진행 (위 함수들 사용)
+- `apps/web/src/components/game/ActionBar.tsx` — 클라이언트 즉시 검증
+
+### Socket.io 이벤트 스펙
+- 정의 위치: `apps/server/src/socket/`
+  - `roomHandler.ts`: `room:create`, `room:join`, `room:reconnect`
+  - `gameHandler.ts`: `game:start`, `game:play`, `game:pass`, `game:ready`
+- `room:create` payload: `{ playerName, mode? }` — mode='full' 또는 'recommended'
 
 ---
 
-## 게임 핵심 규칙 요약 (FGG)
+## E2E 테스트 전략 (3 layer)
 
-- **숫자 서열**: **1 > 15 > 14 > 13 > ... > 4 > 3 > 2** (1이 최강 ace, 2가 최약)
-- **문양 서열**: 주작(sun) > 현무(moon) > 백호(star) > 청룡(cloud)
-- **낼 수 있는 개수**: 1개 / 2개 / 3개 / 5개 (4개 불가)
-- **5개 조합 족보**: 스트레이트 < 플러시 < 풀하우스 < 포카드 < 스트레이트플러시
-- **스트레이트**: 1은 maxNumber 뒤에 ace high로 붙음 (e.g. 12-13-14-15-1). 2는 일반 최저값 (2-3-4-5-6 가능). 1과 2는 한 스트레이트에 함께 못 들어감.
-- **첫 선**: 청룡2(cloud-2, 최약 타일) 보유자
-- **점수**: 남은 타일 수 차이만큼 칩 교환, **숫자 1 보유 시 2^n 배 페널티**
-- **인원별**: 3인(1~9, 12개), 4인(1~13, 13개), 5인(1~15, 12개)
+| Layer | 위치 | 실행 |
+|---|---|---|
+| L1 게임로직 단위 | `packages/game-logic/__tests__/` | `pnpm test` |
+| L2 서버 멀티플레이 봇 | `apps/server/test/e2e_bot_test.ts` | `ts-node` 실행 (서버 3001 띄운 상태) |
+| L3 Flutter UI | `apps/flutter/integration_test/` | `patrol test --target ...` |
 
-### 사신수 ↔ Suit 매핑 (오행 기반)
+Patrol MCP: `.mcp.json` (프로젝트 루트) + `.claude/run-patrol` (런처). `patrol_cli` 전역 설치 + PATH 추가 필요.
 
-| Suit | 사신수 | 오행/방위 | 숫자 색상 | 연결 의미 |
-|---|---|---|---|---|
-| `sun`   | **주작** (朱雀, Vermilion Bird) | 火/南/夏 | 붉은 `#C8323D` | 火 + 陽의 극치 |
-| `moon`  | **현무** (玄武, Black Tortoise) | 水/北/冬 | 초록 `#2A8C56` | 水 + 陰의 고요함 |
-| `star`  | **백호** (白虎, White Tiger)    | 金/西/秋 | 검정 `#1A1408` | 서방 28수 별자리 (이미지가 흰 호랑이라 검정 숫자) |
-| `cloud` | **청룡** (青龍, Azure Dragon)   | 木/東/春 | 푸른 `#3A5A8C` | 雲從龍 |
+---
 
-> 기존 LEXIO 룰(2가 최강)에서 **1이 최강**으로 변경됨. 페널티 타일도 2 → 1.
-> 타일 일러스트: 주작/청룡/백호/현무 — 사용자 제공 이미지 (`apps/web/public/sasinsoo/*.png`).
-> 화면 라우트: `/` (로비), `/room/[roomId]` (대기실+게임), `/guide` (족보), `/tutorial` (튜토리얼), `/test/[count]` (개발용 mock — production 차단).
+## 디자인 시스템 (FGG)
+
+### 컬러 토큰 (`globals.css`)
+```css
+--fgg-jujak: #C8323D       /* 주작, 火/南 — 빨강 */
+--fgg-cheongryong: #2A8C56 /* 청룡, 木/東 — 초록 */
+--fgg-baekho: #D88438      /* 백호, 金/西 — 황금 */
+--fgg-hyunmu: #3A5A8C      /* 현무, 水/北 — 짙은 청 */
+
+--fgg-gold / --fgg-gold-bright / --fgg-gold-deep   /* 카지노 골드 */
+--fgg-bg-0/1/2 / --fgg-felt-0/1/2                  /* 배경 + 펠트 */
+--fgg-text / --fgg-text-dim / --fgg-text-muted
+--fgg-line / --fgg-line-strong                     /* 골드 라인 */
+```
+
+### 타입
+- 디스플레이: Cormorant Garamond (`--fgg-font-display`)
+- 본문: Pretendard / Noto Sans KR
+- 숫자: Cormorant Garamond (lining)
+
+### 타일 디자인
+- 마작패 스타일 (아이보리 본체 + 그림자 stack)
+- 사신수 일러스트 중앙 (`/public/sasinsoo/jujak.png` 등) — 사용자 제공
+- 좌상단 + 우하단(180° 회전) 두 곳에 숫자
+- 1번 ace는 골드 외곽 + glow 차별화
+- 숫자 색상: 주작=빨강 / 현무=초록 / 백호=검정(흰 호랑이용) / 청룡=푸른
+
+---
+
+## 향후 작업
+
+- [ ] 사신수 60장 일러스트 (4 × 15 number 변형) — 사용자 자료 준비 중
+- [ ] Flutter 앱 측 매핑 swap 동기화
+- [ ] 통합 테스트 (웹 ↔ Flutter 크로스 플레이)
+- [ ] 도메인 취득 후 Cloudflare Tunnel 전환
+- [ ] 앱 스토어 배포 (선택)
