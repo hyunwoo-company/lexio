@@ -46,7 +46,11 @@ body {
   touch-action: manipulation;
   background: var(--fgg-bg-0);
   color: var(--fgg-text);
+  /* 사신수 floating absolute(left:-4%, right:-4%)으로 인한 horizontal scroll 방지 */
+  overflow-x: hidden;
 }
+
+html { overflow-x: hidden; }
 
 * {
   -webkit-overflow-scrolling: touch;
