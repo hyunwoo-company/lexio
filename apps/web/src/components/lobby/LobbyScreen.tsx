@@ -150,12 +150,126 @@ export function LobbyScreen() {
       className="min-h-screen flex flex-col items-center justify-center p-6"
       style={{
         background:
-          'radial-gradient(ellipse at top, rgba(212,166,86,0.06) 0%, transparent 55%), var(--fgg-bg-0)',
+          'radial-gradient(ellipse at center, rgba(212,166,86,0.10) 0%, transparent 55%), radial-gradient(ellipse at top, rgba(212,166,86,0.05) 0%, transparent 65%), var(--fgg-bg-0)',
         color: 'var(--fgg-text)',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      {/* Brand block */}
-      <div className="flex flex-col items-center text-center" style={{ marginBottom: 32 }}>
+      {/* ── 사신수 floating background — 동서남북 ── */}
+      {/* 위 (북): 현무 — 水/陰 */}
+      <img
+        src="/sasinsoo/hyunmu.png"
+        alt=""
+        aria-hidden
+        draggable={false}
+        style={{
+          position: 'absolute',
+          top: '4%',
+          left: '50%',
+          width: 240,
+          opacity: 0.18,
+          filter: 'blur(0.5px) saturate(0.85)',
+          mixBlendMode: 'screen',
+          ['--tx' as string]: '-50%',
+          ['--ty' as string]: '0px',
+          animation: 'fgg-float 6s ease-in-out infinite',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 0,
+        }}
+      />
+      {/* 아래 (남): 주작 — 火/陽 */}
+      <img
+        src="/sasinsoo/jujak.png"
+        alt=""
+        aria-hidden
+        draggable={false}
+        style={{
+          position: 'absolute',
+          bottom: '4%',
+          left: '50%',
+          width: 240,
+          opacity: 0.16,
+          filter: 'blur(0.5px) saturate(0.95)',
+          mixBlendMode: 'screen',
+          ['--tx' as string]: '-50%',
+          ['--ty' as string]: '0px',
+          animation: 'fgg-float 7s ease-in-out infinite -2s',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 0,
+        }}
+      />
+      {/* 좌 (동): 청룡 — 木 */}
+      <img
+        src="/sasinsoo/cheongryong.png"
+        alt=""
+        aria-hidden
+        draggable={false}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '2%',
+          width: 280,
+          opacity: 0.16,
+          filter: 'blur(0.5px) saturate(0.85)',
+          mixBlendMode: 'screen',
+          ['--tx' as string]: '0',
+          ['--ty' as string]: '-50%',
+          animation: 'fgg-float 5.5s ease-in-out infinite -1s',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 0,
+        }}
+      />
+      {/* 우 (서): 백호 — 金 */}
+      <img
+        src="/sasinsoo/baekho.png"
+        alt=""
+        aria-hidden
+        draggable={false}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          right: '2%',
+          width: 240,
+          opacity: 0.18,
+          filter: 'blur(0.5px) saturate(0.85)',
+          mixBlendMode: 'screen',
+          ['--tx' as string]: '0',
+          ['--ty' as string]: '-50%',
+          animation: 'fgg-float 6.5s ease-in-out infinite -3s',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 0,
+        }}
+      />
+
+      {/* 중앙 골드 spotlight */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '38%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 480,
+          height: 480,
+          borderRadius: '50%',
+          background:
+            'radial-gradient(circle, rgba(242,200,120,0.28) 0%, rgba(212,166,86,0.10) 35%, transparent 70%)',
+          animation: 'fgg-glow-pulse 5s ease-in-out infinite',
+          pointerEvents: 'none',
+          zIndex: 0,
+          filter: 'blur(8px)',
+        }}
+      />
+
+      {/* ── Hero / 폼 ── */}
+      <div
+        className="flex flex-col items-center text-center"
+        style={{ marginBottom: 32, position: 'relative', zIndex: 1, animation: 'fgg-fade-up 700ms ease-out' }}
+      >
         <LogoMark size={88} />
         <h1
           className="fgg-display"
@@ -202,6 +316,11 @@ export function LobbyScreen() {
           display: 'flex',
           flexDirection: 'column',
           gap: 18,
+          position: 'relative',
+          zIndex: 1,
+          animation: 'fgg-fade-up 800ms ease-out 100ms backwards',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
         }}
       >
         <div>
@@ -380,6 +499,9 @@ export function LobbyScreen() {
           color: 'var(--fgg-text-muted)',
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
+          position: 'relative',
+          zIndex: 1,
+          animation: 'fgg-fade-up 900ms ease-out 200ms backwards',
         }}
       >
         3~5인 · 온라인 멀티플레이

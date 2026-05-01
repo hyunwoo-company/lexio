@@ -68,6 +68,30 @@ body {
   50% { opacity: 0.4; }
 }
 
+/* 사신수 floating — 부드러운 상하 흔들림 */
+@keyframes fgg-float {
+  0%, 100% { transform: translate(var(--tx, 0), var(--ty, 0)); }
+  50%      { transform: translate(var(--tx, 0), calc(var(--ty, 0) - 10px)); }
+}
+
+/* hero 등장 — fade + slight rise */
+@keyframes fgg-fade-up {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 골드 spotlight 펄스 */
+@keyframes fgg-glow-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.85; }
+}
+
+.fgg-help-link:hover {
+  border-color: var(--fgg-gold) !important;
+  color: var(--fgg-gold-bright) !important;
+  background: rgba(212, 166, 86, 0.06) !important;
+}
+
 /* ===== FGG 타일 — 마작패 스타일 (아이보리 본체 + 그림자) ===== */
 .fgg-tile {
   position: relative;
