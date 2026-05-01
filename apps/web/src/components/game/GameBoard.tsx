@@ -35,7 +35,7 @@ export function GameBoard() {
   const socket = useSocket();
   const [sortMode, setSortMode] = useState<'number' | 'suit'>('number');
 
-  // 모바일 브라우저 주소창 hide 트리거 — viewport 1px 스크롤로 hide 유도
+  // 모바일 브라우저 주소창 hide 트리거
   useEffect(() => {
     const t = window.setTimeout(() => {
       try {
@@ -44,6 +44,21 @@ export function GameBoard() {
     }, 150);
     return () => window.clearTimeout(t);
   }, []);
+
+  // 턴 타이머 — 매 턴 시작 시 120초 reset, 0 도달 시 자동 pass
+  const TURN_SECONDS = 120;
+  const [turnSecondsLeft, setTurnSecondsLeft] = useState(TURN_SECONDS);
+  const currentPlayerId = gameState?.players[gameState.currentPlayerIndex]?.id;
+  useEffect(() => {
+    setTurnSecondsLeft(TURN_SECONDS);
+  }, [currentPlayerId, gameState?.roundNumber]);
+  useEffect(() => {
+    if (!currentPlayerId) return;
+    const tid = window.setInterval(() => {
+      setTurnSecondsLeft((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => window.clearInterval(tid);
+  }, [currentPlayerId]);
 
   if (!gameState || !myId || !roomId) return null;
 
@@ -66,6 +81,14 @@ export function GameBoard() {
     socket.emit('game:pass', { roomId });
     clearSelection();
   };
+
+  // 0초 도달 + 내 차례면 자동 pass (서버 도달 못해도 client UX 차원)
+  useEffect(() => {
+    if (turnSecondsLeft === 0 && gameState && currentPlayerId === myId) {
+      handlePass();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turnSecondsLeft]);
 
   const handleReady = () => {
     socket.emit('game:ready', { roomId });
@@ -144,6 +167,8 @@ export function GameBoard() {
         round={gameState.roundNumber}
         currentTurnName={currentPlayer?.name ?? '?'}
         roomCode={roomId}
+        turnSecondsLeft={turnSecondsLeft}
+        turnTotalSeconds={TURN_SECONDS}
       />
 
       {/* Oval 테이블 + 중앙필드를 담는 메인 영역 — 좌측 상대 list / 우측 ActionBar 회피 */}

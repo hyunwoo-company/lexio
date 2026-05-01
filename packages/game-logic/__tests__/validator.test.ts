@@ -53,8 +53,36 @@ describe('detectCombination', () => {
       expect(result?.type).toBe('straight');
     });
 
-    it('FGG: 1과 2가 함께 있는 [1,2,3,4,5]는 invalid', () => {
+    it('FGG: [1,2,3,4,5]는 ace low straight로 valid', () => {
       const tiles = [tile(1, 'sun'), tile(2, 'moon'), tile(3, 'star'), tile(4, 'cloud'), tile(5, 'sun')];
+      const result = detectCombination(tiles);
+      expect(result?.type).toBe('straight');
+    });
+
+    it('FGG: 12-13-14-15-1 (ace high) > 1-2-3-4-5 (ace low) — 강도 비교', () => {
+      const aceHigh = detectCombination(
+        [tile(12, 'sun'), tile(13, 'moon'), tile(14, 'star'), tile(15, 'cloud'), tile(1, 'sun')],
+        15,
+      );
+      const aceLow = detectCombination(
+        [tile(1, 'sun'), tile(2, 'moon'), tile(3, 'star'), tile(4, 'cloud'), tile(5, 'sun')],
+        15,
+      );
+      expect(aceHigh?.strength).toBeGreaterThan(aceLow?.strength ?? 0);
+    });
+
+    it('FGG: 일반 straight (2-3-4-5-6) > ace low (1-2-3-4-5)', () => {
+      const normal = detectCombination(
+        [tile(2, 'sun'), tile(3, 'moon'), tile(4, 'star'), tile(5, 'cloud'), tile(6, 'sun')],
+      );
+      const aceLow = detectCombination(
+        [tile(1, 'sun'), tile(2, 'moon'), tile(3, 'star'), tile(4, 'cloud'), tile(5, 'sun')],
+      );
+      expect(normal?.strength).toBeGreaterThan(aceLow?.strength ?? 0);
+    });
+
+    it('FGG: 1+2 포함 다른 조합 [1,2,4,5,6]은 invalid (ace low는 1-2-3-4-5만)', () => {
+      const tiles = [tile(1, 'sun'), tile(2, 'moon'), tile(4, 'star'), tile(5, 'cloud'), tile(6, 'sun')];
       const result = detectCombination(tiles);
       expect(result?.type).not.toBe('straight');
       expect(result?.type).not.toBe('straightflush');

@@ -29,12 +29,23 @@ export const COMBINATION_RANK: Record<CombinationType, number> = {
   straightflush: 4,
 };
 
-// 인원수별 게임 설정
+// 인원수별 게임 설정 — 'recommended' (기존 룰)
 export const GAME_CONFIG: Record<PlayerCount, GameConfig> = {
-  3: { playerCount: 3, maxNumber: 9, tilesPerPlayer: 12 },
-  4: { playerCount: 4, maxNumber: 13, tilesPerPlayer: 13 },
-  5: { playerCount: 5, maxNumber: 15, tilesPerPlayer: 12 },
+  3: { playerCount: 3, maxNumber: 9, tilesPerPlayer: 12, mode: 'recommended' },
+  4: { playerCount: 4, maxNumber: 13, tilesPerPlayer: 13, mode: 'recommended' },
+  5: { playerCount: 5, maxNumber: 15, tilesPerPlayer: 12, mode: 'recommended' },
 };
+
+// 'full' 모드 — 모든 인원이 1~15 사용 (deck 60장 / 인원수)
+export const GAME_CONFIG_FULL: Record<PlayerCount, GameConfig> = {
+  3: { playerCount: 3, maxNumber: 15, tilesPerPlayer: 20, mode: 'full' },
+  4: { playerCount: 4, maxNumber: 15, tilesPerPlayer: 15, mode: 'full' },
+  5: { playerCount: 5, maxNumber: 15, tilesPerPlayer: 12, mode: 'full' },
+};
+
+export function getGameConfig(playerCount: PlayerCount, mode: 'recommended' | 'full' = 'recommended'): GameConfig {
+  return mode === 'full' ? GAME_CONFIG_FULL[playerCount] : GAME_CONFIG[playerCount];
+}
 
 export const ALL_SUITS: Suit[] = ['sun', 'moon', 'star', 'cloud'];
 

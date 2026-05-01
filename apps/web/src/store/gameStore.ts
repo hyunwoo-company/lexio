@@ -17,6 +17,8 @@ interface GameStore {
   roomInfo: RoomInfo | null;
   gameState: ClientGameState | null;
   selectedTileIds: string[];
+  /** 사용자 손패 정렬 순서 (drag로 재배치한 결과). 빈 배열이면 자동 정렬. */
+  customHandOrder: string[];
   roundResult: RoundResult | null;
   error: string | null;
 
@@ -27,6 +29,7 @@ interface GameStore {
   toggleTile: (tileId: string) => void;
   selectTiles: (tileIds: string[]) => void;
   clearSelection: () => void;
+  setCustomHandOrder: (ids: string[]) => void;
   setError: (msg: string | null) => void;
   reset: () => void;
 }
@@ -38,6 +41,7 @@ export const useGameStore = create<GameStore>((set) => ({
   roomInfo: null,
   gameState: null,
   selectedTileIds: [],
+  customHandOrder: [],
   roundResult: null,
   error: null,
 
@@ -53,7 +57,8 @@ export const useGameStore = create<GameStore>((set) => ({
     })),
   selectTiles: (tileIds) => set({ selectedTileIds: tileIds }),
   clearSelection: () => set({ selectedTileIds: [] }),
+  setCustomHandOrder: (ids) => set({ customHandOrder: ids }),
   setError: (msg) => set({ error: msg }),
   reset: () =>
-    set({ roomId: null, myId: null, myName: null, roomInfo: null, gameState: null, selectedTileIds: [], roundResult: null, error: null }),
+    set({ roomId: null, myId: null, myName: null, roomInfo: null, gameState: null, selectedTileIds: [], customHandOrder: [], roundResult: null, error: null }),
 }));

@@ -57,12 +57,18 @@ export function ActionBar({
     return { canPlay: true };
   }, [isMyTurn, selectedCount, gameState, myHand, selectedTileIds]);
 
+  // 추천 cycle: [combo0, combo1, ..., comboN-1, deselect] → 다시 처음부터
   const handleHint = () => {
     if (suggestions.length === 0) return;
-    const idx = hintIndexRef.current % suggestions.length;
-    const combo = suggestions[idx];
-    selectTiles(combo.tiles.map((t) => t.id));
-    hintIndexRef.current = idx + 1;
+    const cycleLen = suggestions.length + 1;
+    const cur = hintIndexRef.current % cycleLen;
+    if (cur === suggestions.length) {
+      selectTiles([]); // 모든 추천 본 후 한 번 더 누르면 선택 해제
+    } else {
+      const combo = suggestions[cur];
+      selectTiles(combo.tiles.map((t) => t.id));
+    }
+    hintIndexRef.current = (cur + 1) % cycleLen;
   };
 
   const canPlay = playValidity.canPlay;

@@ -1,0 +1,360 @@
+/* ===== Lexio Design System — Premium Dark / Casino Poker Room ===== */
+
+:root {
+  /* Brand */
+  --lx-gold:        #D4A656;
+  --lx-gold-bright: #F2C878;
+  --lx-gold-deep:   #8C6A2A;
+
+  /* Suit colors */
+  --lx-sun:    #E63946; /* red — highest */
+  --lx-moon:   #2DBA6F; /* green */
+  --lx-star:   #F2C14E; /* yellow */
+  --lx-cloud:  #3A8DDE; /* blue — lowest */
+
+  /* Surfaces (deep poker-room palette) */
+  --lx-bg-0:    #0A0F0D; /* deepest */
+  --lx-bg-1:    #11181A;
+  --lx-bg-2:    #1A2326;
+  --lx-bg-3:    #243032;
+  --lx-felt-0:  #0E3A2C; /* table felt — deep emerald */
+  --lx-felt-1:  #134A38;
+  --lx-felt-2:  #1E5C46;
+
+  /* Text */
+  --lx-text:        #F2EAD3;
+  --lx-text-dim:    #B7AC8E;
+  --lx-text-muted:  #6F6650;
+  --lx-text-faint:  #3F3A2C;
+
+  /* Lines */
+  --lx-line:        rgba(212, 166, 86, 0.18);
+  --lx-line-strong: rgba(212, 166, 86, 0.35);
+  --lx-line-subtle: rgba(255, 255, 255, 0.06);
+
+  /* Tile */
+  --lx-tile-bg-1:   #1B1B1E;
+  --lx-tile-bg-2:   #0B0B0D;
+  --lx-tile-edge:   #2D2D32;
+
+  /* Effects */
+  --lx-shadow-soft: 0 2px 8px rgba(0,0,0,0.4);
+  --lx-shadow-deep: 0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
+  --lx-glow-gold:   0 0 24px rgba(212, 166, 86, 0.35);
+  --lx-glow-select: 0 0 0 2px var(--lx-gold), 0 0 24px rgba(242, 200, 120, 0.4);
+
+  /* Type */
+  --lx-font-display: 'Cormorant Garamond', 'Noto Serif KR', Georgia, serif;
+  --lx-font-body:    'Pretendard', 'Noto Sans KR', -apple-system, system-ui, sans-serif;
+  --lx-font-mono:    'JetBrains Mono', 'Menlo', monospace;
+  --lx-font-num:     'Cormorant Garamond', 'Noto Serif KR', Georgia, serif;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--lx-font-body);
+  color: var(--lx-text);
+  background: var(--lx-bg-0);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Lexio Standing Tile — 3D mahjong-style ivory =====
+   The tile stands upright on the felt. The cap (top surface) is intentionally
+   minimal — the standing pose is sold by:
+   - A subtle bevel/highlight along the TOP edge (the rounded top of the tile)
+   - Side-edge shading (left/right) to imply rounded corners
+   - A heavy, long GROUND SHADOW under the bottom edge
+   - Stacked dark ivory at the very base (the tile sitting on its base)
+*/
+.mj-tile {
+  position: relative;
+  padding: 0;
+  border: none;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background:
+    /* top highlight — the rounded top edge catches light */
+    linear-gradient(180deg, #FFFDF4 0%, #FAF1D6 6%, #F4E6C0 18%, #F4E6C0 82%, #E2CC95 96%, #C8AC72 100%),
+    #F4E6C0;
+  /* side-edge shadows — implies the tile has rounded corners catching shadow on the sides */
+  box-shadow:
+    /* left/right inner edge shading */
+    inset 2px 0 4px -1px rgba(140, 110, 60, 0.18),
+    inset -2px 0 4px -1px rgba(140, 110, 60, 0.22),
+    /* bottom inner darkening — the base is in shadow */
+    inset 0 -3px 5px -1px rgba(120, 90, 40, 0.32),
+    /* very subtle inner top highlight */
+    inset 0 1px 0 rgba(255, 252, 240, 0.9),
+    /* stacked base — reads as the tile sitting on the felt */
+    0 1px 0 #C9B07F,
+    0 3px 0 #A88E5E,
+    0 5px 0 #806B45,
+    /* long, soft ground shadow */
+    0 12px 14px -2px rgba(0,0,0,0.45),
+    0 22px 28px -6px rgba(0,0,0,0.5),
+    0 4px 8px rgba(0,0,0,0.3);
+  transition: transform 160ms cubic-bezier(.2,.8,.2,1), box-shadow 160ms;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* CAP — disabled (no top cap; tile front fills full height) */
+.mj-tile__cap {
+  display: none;
+}
+
+/* Subtle vertical sheen down the front face — like light hitting a glossy ivory tile */
+.mj-tile::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 70% 35% at 32% 18%, rgba(255,255,255,0.45) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 20% at 75% 12%, rgba(255,255,255,0.25) 0%, transparent 65%),
+    linear-gradient(180deg, transparent 0%, transparent 70%, rgba(140, 110, 60, 0.08) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mj-tile.is-clickable { cursor: pointer; }
+.mj-tile.is-clickable:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    inset 2px 0 4px -1px rgba(140, 110, 60, 0.18),
+    inset -2px 0 4px -1px rgba(140, 110, 60, 0.22),
+    inset 0 -3px 5px -1px rgba(120, 90, 40, 0.32),
+    inset 0 1px 0 rgba(255, 252, 240, 0.9),
+    0 1px 0 #C9B07F,
+    0 3px 0 #A88E5E,
+    0 5px 0 #806B45,
+    0 18px 18px -2px rgba(0,0,0,0.5),
+    0 28px 32px -6px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(212, 166, 86, 0.5);
+}
+.mj-tile.is-selected {
+  box-shadow:
+    inset 2px 0 4px -1px rgba(140, 110, 60, 0.18),
+    inset -2px 0 4px -1px rgba(140, 110, 60, 0.22),
+    inset 0 -3px 5px -1px rgba(120, 90, 40, 0.32),
+    inset 0 1px 0 rgba(255, 252, 240, 0.9),
+    0 1px 0 #C9B07F,
+    0 3px 0 #A88E5E,
+    0 5px 0 #806B45,
+    0 22px 24px -2px rgba(0,0,0,0.55),
+    0 32px 38px -6px rgba(0,0,0,0.6),
+    0 0 0 2px var(--lx-gold),
+    0 0 22px rgba(242, 200, 120, 0.55);
+}
+.mj-tile.is-dimmed { opacity: 0.45; filter: grayscale(0.4); }
+
+/* Top-edge specular highlight — a brighter sheen along the very top */
+.mj-tile__top-shine {
+  position: absolute;
+  top: 0; left: 4%; right: 4%;
+  height: 4px;
+  background: linear-gradient(180deg, rgba(255, 253, 240, 0.95) 0%, rgba(255, 253, 240, 0.0) 100%);
+  pointer-events: none;
+  filter: blur(0.4px);
+  z-index: 4;
+  border-radius: inherit;
+}
+
+/* Front face gloss — disabled; subtle gloss now lives on ::before */
+.mj-tile__gloss { display: none; }
+
+/* Center colored emblem (suit ring + number) */
+.mj-tile__emblem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+/* Outer rim — pencil-thin border for crisp rounded edge */
+.mj-tile__rim {
+  position: absolute; inset: 0;
+  border: 1px solid rgba(140, 110, 60, 0.35);
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,250,230,0.5);
+  border-radius: inherit;
+  z-index: 5;
+}
+
+/* ===== Face-down tile (back) — IVORY block, same shape as the front =====
+   Opponents' tiles. The back of a mahjong tile is plain ivory with a subtle
+   inset panel — visually distinct from a face-up tile but same material/color
+   so it never disappears against the felt. */
+.mj-tile--back {
+  background: transparent;
+  box-shadow:
+    0 1px 0 -0px #DCC79A,
+    0 3px 0 -1px #C9B07F,
+    0 5px 0 -2px #A88E5E,
+    0 7px 0 -3px #806B45,
+    0 14px 18px -4px rgba(0,0,0,0.5),
+    0 4px 8px rgba(0,0,0,0.32);
+}
+.mj-tile--back::before { display: none; }
+.mj-tile--back .mj-tile__cap {
+  background: linear-gradient(180deg, #E2CC9C 0%, #CDB37E 55%, #A88E5C 100%);
+}
+.mj-tile__back-face {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(255,250,225,0.5) 0%, transparent 55%),
+    linear-gradient(180deg, #FBF2DC 0%, #F4E6C2 55%, #E8D4A2 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(140, 110, 60, 0.25),
+    inset 0 1px 2px rgba(255,250,235,0.7),
+    inset 0 -2px 3px rgba(140, 110, 60, 0.2);
+  z-index: 1;
+  border-radius: inherit;
+}
+.mj-tile__back-face::after {
+  content: '';
+  position: absolute;
+  inset: 16%;
+  border: 1px solid rgba(140, 110, 60, 0.3);
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(45deg, rgba(140, 110, 60, 0.07) 0 1px, transparent 1px 6px);
+}
+
+/* ===== Buttons ===== */
+.lx-btn {
+  font-family: var(--lx-font-body);
+  font-weight: 600;
+  border: 1px solid var(--lx-line-strong);
+  background: linear-gradient(180deg, #2A2520 0%, #181410 100%);
+  color: var(--lx-text);
+  padding: 10px 18px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 120ms;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.lx-btn:hover { border-color: var(--lx-gold); color: var(--lx-gold-bright); }
+.lx-btn--primary {
+  background: linear-gradient(180deg, var(--lx-gold-bright) 0%, var(--lx-gold) 50%, var(--lx-gold-deep) 100%);
+  border-color: var(--lx-gold-deep);
+  color: #1A1408;
+  box-shadow: 0 4px 12px rgba(212, 166, 86, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.lx-btn--primary:hover {
+  filter: brightness(1.08);
+  color: #1A1408;
+}
+.lx-btn--danger {
+  background: linear-gradient(180deg, #5A2128 0%, #2E0F14 100%);
+  border-color: #8E3540;
+  color: #FFD0D0;
+}
+.lx-btn--ghost {
+  background: transparent;
+  border-color: var(--lx-line);
+}
+
+/* ===== Cards / Panels ===== */
+.lx-panel {
+  background: linear-gradient(180deg, var(--lx-bg-2) 0%, var(--lx-bg-1) 100%);
+  border: 1px solid var(--lx-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--lx-shadow-deep);
+}
+
+/* ===== Felt table ===== */
+.lx-felt {
+  background:
+    radial-gradient(ellipse at center, var(--lx-felt-2) 0%, var(--lx-felt-1) 50%, var(--lx-felt-0) 100%),
+    var(--lx-felt-0);
+  position: relative;
+}
+.lx-felt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    repeating-radial-gradient(circle at 30% 40%, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px),
+    repeating-radial-gradient(circle at 70% 60%, rgba(0,0,0,0.04) 0 1px, transparent 1px 4px);
+  pointer-events: none;
+}
+
+/* ===== Type ===== */
+.lx-display {
+  font-family: var(--lx-font-display);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.lx-mono { font-family: var(--lx-font-mono); }
+.lx-eyebrow {
+  font-family: var(--lx-font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lx-gold);
+}
+
+/* ===== Avatar chip ===== */
+.lx-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3A2D1A, #1A1408);
+  border: 2px solid var(--lx-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--lx-font-display);
+  font-weight: 600;
+  color: var(--lx-gold-bright);
+  box-shadow: 0 0 12px rgba(212, 166, 86, 0.25);
+}
+
+/* ===== Chip (score) ===== */
+.lx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(212, 166, 86, 0.1);
+  border: 1px solid var(--lx-line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lx-gold-bright);
+  font-family: var(--lx-font-num);
+  font-feature-settings: 'lnum';
+}
+
+/* ===== Hand fan styling helpers ===== */
+.lx-hand {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Bezel-friendly resets */
+.lx-screen { width: 100%; height: 100%; overflow: hidden; position: relative; }
+
+/* Subtle scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(212,166,86,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212,166,86,0.4); }

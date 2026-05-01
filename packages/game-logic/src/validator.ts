@@ -1,4 +1,5 @@
 import { NUMBER_RANK, SUIT_RANK } from './constants';
+import type { Suit } from './types';
 import { calcSimpleStrength, getNumberRank, getSuitRank, getStrongestTile } from './comparator';
 import type { Tile, TileCombination, TileNumber } from './types';
 
@@ -91,16 +92,29 @@ function isStraight(tiles: Tile[], maxNumber: TileNumber): boolean {
   return true;
 }
 
-// FGG 스트레이트 정렬: 1은 maxNumber 다음 (ace high)로 처리
-// 2는 일반 최저값으로 처리 (e.g., 2-3-4-5-6 가능)
-// 1과 2가 모두 있으면 invalid (1은 ace, 2는 low — 한 스트레이트에 못 섞임)
+// FGG 스트레이트 정렬:
+//   - 1은 ace high (maxNumber 뒤): 12-13-14-15-1 같은 형태
+//   - 1-2-3-4-5는 ace low 특수 케이스로 허용 (1+2+3+4+5만)
+//   - 2는 그 외 일반 최저값 (2-3-4-5-6 가능)
 // 반환: 정렬된 서열 배열, 유효하지 않으면 null
 function sortByStraightOrder(tiles: Tile[], maxNumber: TileNumber): number[] | null {
   const numbers = tiles.map((t) => t.number);
   const has1 = numbers.includes(1);
+  const has2 = numbers.includes(2);
+
+  // 1과 2가 모두 있는 경우 — 1-2-3-4-5 ace low 만 허용
+  if (has1 && has2) {
+    const rest = [...numbers].sort((a, b) => a - b);
+    if (rest.length !== 5) return null;
+    if (rest[0] === 1 && rest[1] === 2 && rest[2] === 3 && rest[3] === 4 && rest[4] === 5) {
+      // 1을 가장 약한 위치로 (가상 rank -1) → straight 강도는 5
+      return [-1, 0, 1, 2, 3];
+    }
+    return null;
+  }
 
   if (has1) {
-    // 1이 있으면: 나머지 4개가 maxNumber-3 ~ maxNumber 연속이어야 함
+    // 1이 있고 2가 없으면 ace high — 나머지 4개가 maxNumber-3 ~ maxNumber 연속이어야 함
     const others = numbers.filter((n) => n !== 1);
     const otherRanks = others.map((n) => NUMBER_RANK[n as TileNumber]);
     const maxRank = NUMBER_RANK[maxNumber];
@@ -123,15 +137,32 @@ function sortByStraightOrder(tiles: Tile[], maxNumber: TileNumber): number[] | n
   return sorted;
 }
 
-// 스트레이트 strength: 가장 높은 위치의 numberRank
+// 스트레이트 strength: 가장 높은 위치의 (numberRank * 10 + suitRank)
+// 같은 숫자 sequence면 max card의 suit로 tie-break
+//   - ace high (12-13-14-15-1): top = 1 (ace)
+//   - ace low (1-2-3-4-5): top = 5 (1을 가장 약한 위치로)
+//   - 일반: top = max number
 function straightStrength(tiles: Tile[], maxNumber: TileNumber): number {
-  const has1 = tiles.some((t) => t.number === 1);
-  if (has1) {
-    // 1이 있는 스트레이트가 최강 (maxNumber 뒤에 1)
-    return NUMBER_RANK[maxNumber] + 1;
+  const numbers = tiles.map((t) => t.number);
+  const has1 = numbers.includes(1);
+  const has2 = numbers.includes(2);
+
+  let topTile: Tile | undefined;
+  let topRank: number;
+
+  if (has1 && has2) {
+    topTile = tiles.find((t) => t.number === 5);
+    topRank = NUMBER_RANK[5 as TileNumber];
+  } else if (has1) {
+    topTile = tiles.find((t) => t.number === 1);
+    topRank = NUMBER_RANK[maxNumber] + 1;
+  } else {
+    const maxNum = Math.max(...numbers) as TileNumber;
+    topTile = tiles.find((t) => t.number === maxNum);
+    topRank = NUMBER_RANK[maxNum];
   }
-  const maxNum = Math.max(...tiles.map((t) => t.number)) as TileNumber;
-  return NUMBER_RANK[maxNum];
+  const suitRank = topTile ? SUIT_RANK[topTile.suit as Suit] : 0;
+  return topRank * 10 + suitRank;
 }
 
 function groupByNumber(tiles: Tile[]): Tile[][] {

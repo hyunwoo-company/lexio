@@ -1,0 +1,119 @@
+/* ===========================================================
+   LEXIO — Design Tokens (Premium Dark / Casino-poker mood)
+   =========================================================== */
+
+:root {
+  /* Base surfaces — deep, warm-leaning blacks like a poker felt at midnight */
+  --bg-0: #0a0908;          /* deepest — page background */
+  --bg-1: #14110f;          /* card / panel base */
+  --bg-2: #1c1815;          /* raised surface */
+  --bg-3: #262019;          /* inset / input */
+  --bg-4: #34291f;          /* hover */
+
+  /* Felt / table — green baize but desaturated, premium */
+  --felt-0: #0d2418;
+  --felt-1: #143426;
+  --felt-2: #1b4734;
+  --felt-edge: #5c4626;     /* warm wood-grain rim */
+  --felt-edge-hi: #8a6a3d;
+
+  /* Accent — gold leaf, used sparingly for premium feel */
+  --gold-1: #d4a64a;
+  --gold-2: #b8862b;
+  --gold-3: #8a601a;
+  --gold-glow: rgba(212, 166, 74, 0.35);
+
+  /* Crimson — danger / 2-tile penalty, room rejection */
+  --crimson-1: #c0392b;
+  --crimson-2: #8c241a;
+
+  /* Tile suit colors — saturated against black tile body */
+  --suit-sun:    #e84545;   /* 해 (red) — highest */
+  --suit-moon:   #2ecc71;   /* 달 (green) */
+  --suit-star:   #f7c948;   /* 별 (yellow) */
+  --suit-cloud:  #4a90e2;   /* 구름 (blue) — lowest */
+
+  /* Text */
+  --text-1: #f5ead4;        /* warm parchment — primary */
+  --text-2: #c9bda1;        /* secondary */
+  --text-3: #8a7f6a;        /* muted */
+  --text-4: #5a5247;        /* disabled */
+
+  /* Borders / dividers */
+  --line-1: rgba(212, 166, 74, 0.12);
+  --line-2: rgba(212, 166, 74, 0.06);
+  --line-strong: rgba(212, 166, 74, 0.32);
+
+  /* Shadows — long & warm under tiles */
+  --sh-tile: 0 2px 0 rgba(0,0,0,.6), 0 6px 14px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+  --sh-tile-lift: 0 4px 0 rgba(0,0,0,.5), 0 14px 28px rgba(0,0,0,.7), 0 0 0 1px rgba(212,166,74,.4), 0 0 22px rgba(212,166,74,.25);
+  --sh-panel: 0 1px 0 rgba(255,255,255,.04), 0 12px 32px rgba(0,0,0,.55);
+  --sh-pop: 0 24px 60px rgba(0,0,0,.7);
+
+  /* Radii */
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 12px;
+  --r-4: 18px;
+  --r-tile: 6px;
+
+  /* Type */
+  --font-display: 'Cormorant Garamond', 'Noto Serif KR', serif;
+  --font-body: 'Pretendard', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Light theme override (Tweak) */
+[data-theme="light"] {
+  --bg-0: #ece5d3;
+  --bg-1: #f4eedc;
+  --bg-2: #fbf7e8;
+  --bg-3: #e6dcc1;
+  --bg-4: #d6c89f;
+  --felt-0: #c9b58a;
+  --felt-1: #b89e6e;
+  --felt-2: #a48758;
+  --felt-edge: #7a5a2c;
+  --felt-edge-hi: #b8862b;
+  --text-1: #2a2218;
+  --text-2: #5a4a32;
+  --text-3: #8a7755;
+  --text-4: #b5a484;
+  --line-1: rgba(60, 40, 16, 0.14);
+  --line-2: rgba(60, 40, 16, 0.06);
+  --line-strong: rgba(60, 40, 16, 0.4);
+  --sh-tile: 0 2px 0 rgba(60,40,16,.18), 0 6px 14px rgba(60,40,16,.18), inset 0 1px 0 rgba(255,255,255,.5);
+}
+
+[data-theme="sepia"] {
+  --bg-0: #1a140c;
+  --bg-1: #241c12;
+  --bg-2: #2e2418;
+  --bg-3: #3a2d1d;
+  --felt-0: #2a1c0e;
+  --felt-1: #3d2a18;
+  --felt-2: #4d3622;
+  --gold-1: #e8b85a;
+  --gold-2: #c98e30;
+  --text-1: #f9e8c4;
+  --text-2: #d4bd8e;
+}
+
+/* Reset bits */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  color: var(--text-1);
+  background: var(--bg-0);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold-1); outline-offset: 2px; }
+
+/* Utility scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-1); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--line-strong); }

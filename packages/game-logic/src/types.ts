@@ -47,10 +47,17 @@ export interface GameState {
 
 export type PlayerCount = 3 | 4 | 5;
 
+/** 게임 모드:
+ *   - 'recommended': 기존 룰. 인원수에 따라 max number/배분 자동 (3p=1~9, 4p=1~13, 5p=1~15)
+ *   - 'full':        모든 인원 1~15 사용. tilesPerPlayer = 60/playerCount
+ */
+export type GameMode = 'recommended' | 'full';
+
 export interface GameConfig {
   playerCount: PlayerCount;
   maxNumber: 9 | 13 | 15;
-  tilesPerPlayer: 12 | 13;
+  tilesPerPlayer: number;
+  mode?: GameMode;
 }
 
 export interface ChipExchange {
