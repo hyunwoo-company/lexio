@@ -11,12 +11,12 @@ import { ActionBar } from './ActionBar';
 import { ScoreBoard } from './ScoreBoard';
 import type { ClientPlayer, Tile } from '@lexio/game-logic';
 
-// 상대 좌석을 좌측 vertical list로 배치 (루미큐브 스타일)
+// 상대 좌석을 좌측 vertical list로 배치 (루미큐브 스타일) — 카드 컴팩트하게 가까이
 // 0번 = me (하단 중앙, 별도 처리). 1번~ = 좌측에 위→아래로 list.
 const RIVAL_VERTICAL_POSITIONS: Record<3 | 4 | 5, number[]> = {
-  3: [22, 62],            // 상대 2명: 위·아래
-  4: [16, 46, 76],        // 상대 3명: 위·중·아래
-  5: [12, 36, 60, 84],    // 상대 4명: 4분할
+  3: [12, 30],            // 상대 2명
+  4: [12, 28, 44],        // 상대 3명
+  5: [12, 26, 40, 54],    // 상대 4명
 };
 
 // 내 자리(0번) 다음부터 시계방향으로 상대 배치 — gameState.players의 순서를 좌석 인덱스에 매핑

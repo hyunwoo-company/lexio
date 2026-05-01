@@ -164,10 +164,12 @@ export function ActionBar({
         패스
       </button>
 
-      {/* 내기 (큰 골드 primary) */}
+      {/* 내기 (체크 ✓ 골드 primary) */}
       <button
         onClick={onPlay}
         disabled={!canPlay}
+        title="내기"
+        aria-label="내기"
         style={{
           ...sideBtn,
           height: 72,
@@ -181,11 +183,12 @@ export function ActionBar({
             : 'none',
           cursor: canPlay ? 'pointer' : 'not-allowed',
           opacity: canPlay ? 1 : 0.5,
-          fontSize: 14,
-          fontWeight: 700,
+          fontSize: 32,
+          fontWeight: 900,
+          lineHeight: 1,
         }}
       >
-        내기 ▸
+        ✓
       </button>
     </div>
   );
