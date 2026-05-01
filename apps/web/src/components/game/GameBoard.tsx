@@ -264,13 +264,35 @@ export function GameBoard() {
         })}
       </div>
 
-      {/* 하단: 내 손패 + 액션 바 */}
+      {/* 우측 액션 패널 — 루미큐브 스타일 vertical (viewport 우측 가운데) */}
+      <div
+        style={{
+          position: 'absolute',
+          right: 4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 7,
+          pointerEvents: 'auto',
+        }}
+      >
+        <ActionBar
+          isMyTurn={isMyTurn}
+          selectedCount={selectedTileIds.length}
+          onPlay={handlePlay}
+          onPass={handlePass}
+          onSort={() => setSortMode(sortMode === 'number' ? 'suit' : 'number')}
+          sortMode={sortMode}
+        />
+      </div>
+
+      {/* 하단: 내 손패 (우측 액션 패널 영역 제외) */}
       <div
         style={{
           background: 'linear-gradient(180deg, transparent 0%, rgba(10,15,13,0.6) 100%)',
           borderTop: '1px solid var(--fgg-line)',
           zIndex: 6,
           position: 'relative',
+          paddingRight: 76 /* 우측 ActionBar(56) + 4 + 여유 */,
         }}
       >
         {/* 내 identity strip */}
@@ -295,16 +317,6 @@ export function GameBoard() {
 
         {/* 손패 */}
         <PlayerHand hand={(me?.hand ?? []) as Tile[]} isMyTurn={isMyTurn} sortMode={sortMode} />
-
-        {/* 액션바 */}
-        <ActionBar
-          isMyTurn={isMyTurn}
-          selectedCount={selectedTileIds.length}
-          onPlay={handlePlay}
-          onPass={handlePass}
-          onSort={() => setSortMode(sortMode === 'number' ? 'suit' : 'number')}
-          sortMode={sortMode}
-        />
       </div>
 
       {/* 에러 토스트 */}
