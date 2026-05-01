@@ -446,7 +446,7 @@ export function TutorialScreen() {
       {/* Progress */}
       <div
         style={{
-          padding: '20px 32px',
+          padding: 'clamp(12px, 3vw, 20px) clamp(14px, 4vw, 32px)',
           display: 'flex',
           alignItems: 'center',
           gap: 14,
@@ -500,9 +500,9 @@ export function TutorialScreen() {
           flex: 1,
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          alignItems: 'center',
-          padding: '40px 60px',
-          gap: 60,
+          alignItems: 'start',
+          padding: 'clamp(20px, 5vw, 40px) clamp(18px, 5vw, 60px)',
+          gap: 'clamp(20px, 4vw, 60px)',
           maxWidth: 1200,
           margin: '0 auto',
           width: '100%',
@@ -544,13 +544,15 @@ export function TutorialScreen() {
       {/* Footer nav */}
       <div
         style={{
-          padding: '20px 32px',
+          padding: 'clamp(12px, 3vw, 20px) clamp(14px, 4vw, 32px)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           borderTop: '1px solid var(--fgg-line)',
           background: 'var(--fgg-bg-1)',
           gap: 12,
+          position: 'sticky',
+          bottom: 0,
         }}
       >
         <button
