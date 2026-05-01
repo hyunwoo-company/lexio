@@ -1,12 +1,13 @@
 import type { Server, Socket } from 'socket.io';
 import { RoomManager } from '../room/RoomManager';
+import type { GameMode } from '@lexio/game-logic';
 
 export function registerRoomHandlers(io: Server, socket: Socket, rooms: RoomManager): void {
   // socket.handshake.auth.clientId를 안정적인 플레이어 ID로 사용
   const clientId: string = (socket.handshake.auth as { clientId?: string }).clientId ?? socket.id;
 
-  socket.on('room:create', ({ playerName }: { playerName: string }) => {
-    const room = rooms.create();
+  socket.on('room:create', ({ playerName, mode }: { playerName: string; mode?: GameMode }) => {
+    const room = rooms.create(mode === 'full' ? 'full' : 'recommended');
     const player = { id: clientId, name: playerName, socketId: socket.id, isReady: false };
     room.addPlayer(player);
     socket.join(room.id);

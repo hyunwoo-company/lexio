@@ -1,19 +1,25 @@
 import {
   createDeck, shuffleDeck, dealTiles, findFirstPlayer,
   detectCombination, canPlay, calculateScoring, applyExchanges,
-  GAME_CONFIG,
+  getGameConfig,
 } from '@lexio/game-logic';
 import type {
-  GameState, Player, Tile, TileCombination, PlayerCount,
+  GameState, Player, Tile, TileCombination, PlayerCount, GameMode,
   ClientGameState, ClientPlayer, RoundResult,
 } from '@lexio/game-logic';
 
 export class GameEngine {
   private state: GameState;
   private playerCount: PlayerCount;
+  private mode: GameMode;
 
-  constructor(players: Pick<Player, 'id' | 'name'>[], playerCount: PlayerCount) {
+  constructor(
+    players: Pick<Player, 'id' | 'name'>[],
+    playerCount: PlayerCount,
+    mode: GameMode = 'recommended',
+  ) {
     this.playerCount = playerCount;
+    this.mode = mode;
     this.state = {
       phase: 'waiting',
       players: players.map((p) => ({ ...p, hand: [], chips: 60, isConnected: true })),
@@ -27,7 +33,7 @@ export class GameEngine {
   }
 
   startRound(): void {
-    const config = GAME_CONFIG[this.playerCount];
+    const config = getGameConfig(this.playerCount, this.mode);
     const deck = shuffleDeck(createDeck(config));
     const hands = dealTiles(deck, config);
     const firstIdx = findFirstPlayer(hands);
@@ -54,7 +60,7 @@ export class GameEngine {
     const tiles = tileIds.map((id) => currentPlayer.hand.find((t) => t.id === id)).filter(Boolean) as Tile[];
     if (tiles.length !== tileIds.length) return { ok: false, reason: '유효하지 않은 타일입니다.' };
 
-    const config = GAME_CONFIG[this.playerCount];
+    const config = getGameConfig(this.playerCount, this.mode);
     const combination = detectCombination(tiles, config.maxNumber);
     if (!combination) return { ok: false, reason: '유효하지 않은 조합입니다.' };
 

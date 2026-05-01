@@ -1,4 +1,5 @@
 import { Room } from './Room';
+import type { GameMode } from '@lexio/game-logic';
 
 function generateRoomId(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -7,10 +8,10 @@ function generateRoomId(): string {
 export class RoomManager {
   private rooms = new Map<string, Room>();
 
-  create(): Room {
+  create(mode: GameMode = 'recommended'): Room {
     let id = generateRoomId();
     while (this.rooms.has(id)) id = generateRoomId();
-    const room = new Room(id);
+    const room = new Room(id, mode);
     this.rooms.set(id, room);
     return room;
   }

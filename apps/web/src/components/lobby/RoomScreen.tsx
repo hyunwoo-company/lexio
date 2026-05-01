@@ -201,14 +201,34 @@ export function RoomScreen({ roomId }: RoomScreenProps) {
           }}
         >
           <div className="fgg-eyebrow">Players</div>
-          <div
-            style={{
-              fontFamily: 'var(--fgg-font-num)',
-              fontSize: 16,
-              color: 'var(--fgg-text-dim)',
-            }}
-          >
-            <span style={{ color: 'var(--fgg-gold-bright)' }}>{playerCount}</span> / {MAX_SEATS}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+            {room?.mode && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  padding: '3px 10px',
+                  borderRadius: 999,
+                  border: `1px solid ${room.mode === 'full' ? 'var(--fgg-jujak)' : 'var(--fgg-line-strong)'}`,
+                  color: room.mode === 'full' ? 'var(--fgg-jujak)' : 'var(--fgg-gold-bright)',
+                  background: room.mode === 'full' ? 'rgba(200,50,61,0.1)' : 'rgba(212,166,86,0.08)',
+                }}
+                title={room.mode === 'full' ? '전체 모드 (1~15 모든 인원)' : '기본 모드 (인원수별)'}
+              >
+                {room.mode === 'full' ? '전체' : '기본'}
+              </span>
+            )}
+            <div
+              style={{
+                fontFamily: 'var(--fgg-font-num)',
+                fontSize: 16,
+                color: 'var(--fgg-text-dim)',
+              }}
+            >
+              <span style={{ color: 'var(--fgg-gold-bright)' }}>{playerCount}</span> / {MAX_SEATS}
+            </div>
           </div>
         </div>
 

@@ -1,13 +1,14 @@
 'use client';
 
 import { create } from 'zustand';
-import type { ClientGameState, RoundResult } from '@lexio/game-logic';
+import type { ClientGameState, RoundResult, GameMode } from '@lexio/game-logic';
 
 export interface RoomInfo {
   id: string;
   players: { id: string; name: string; isReady: boolean }[];
   playerCount: number;
   isPlaying: boolean;
+  mode?: GameMode;
 }
 
 interface GameStore {

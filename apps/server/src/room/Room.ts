@@ -1,5 +1,5 @@
 import { GameEngine } from '../game/GameEngine';
-import type { PlayerCount } from '@lexio/game-logic';
+import type { PlayerCount, GameMode } from '@lexio/game-logic';
 
 export interface RoomPlayer {
   id: string;       // stable clientId (재연결 시에도 유지)
@@ -14,10 +14,13 @@ export class Room {
   private players: RoomPlayer[] = [];
   private engine: GameEngine | null = null;
   readonly createdAt: number;
+  /** 게임 모드 — 'recommended' (기본) 또는 'full' (모든 인원 1~15) */
+  mode: GameMode;
 
-  constructor(id: string) {
+  constructor(id: string, mode: GameMode = 'recommended') {
     this.id = id;
     this.createdAt = Date.now();
+    this.mode = mode;
   }
 
   addPlayer(player: Omit<RoomPlayer, 'isConnected'>): boolean {
@@ -84,7 +87,8 @@ export class Room {
     const count = this.players.length as PlayerCount;
     this.engine = new GameEngine(
       this.players.map((p) => ({ id: p.id, name: p.name })),
-      count
+      count,
+      this.mode,
     );
     this.engine.startRound();
     return true;
@@ -104,6 +108,7 @@ export class Room {
       players: this.players.map(({ id, name, isReady, isConnected }) => ({ id, name, isReady, isConnected })),
       playerCount: this.players.length,
       isPlaying: !!this.engine,
+      mode: this.mode,
     };
   }
 }

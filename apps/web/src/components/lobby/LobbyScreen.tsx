@@ -6,6 +6,27 @@ import { useRouter } from 'next/navigation';
 import { getSocket } from '@/hooks/useSocket';
 import { useGameStore, type RoomInfo } from '@/store/gameStore';
 import { getClientId, saveSession } from '@/lib/clientId';
+import type { GameMode } from '@lexio/game-logic';
+
+function modeBtn(active: boolean): React.CSSProperties {
+  return {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 1,
+    padding: '10px 12px',
+    borderRadius: 10,
+    border: `1.5px solid ${active ? 'var(--fgg-gold)' : 'var(--fgg-line)'}`,
+    background: active ? 'rgba(212, 166, 86, 0.14)' : 'rgba(10, 15, 13, 0.4)',
+    color: active ? 'var(--fgg-gold-bright)' : 'var(--fgg-text)',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    transition: 'all 140ms',
+    textAlign: 'left',
+    lineHeight: 1.2,
+  };
+}
 
 function LogoMark({ size = 88 }: { size?: number }) {
   return (
@@ -39,6 +60,7 @@ export function LobbyScreen() {
   const [mode, setMode] = useState<'idle' | 'create' | 'join'>('idle');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [gameMode, setGameMode] = useState<GameMode>('recommended');
   const cleanupRef = useRef<(() => void) | null>(null);
   const router = useRouter();
   const { setRoom, setRoomInfo, setError } = useGameStore();
@@ -88,7 +110,7 @@ export function LobbyScreen() {
     socket.on('connect_error', onConnectError);
 
     if (!socket.connected) socket.connect();
-    socket.emit('room:create', { playerName: name });
+    socket.emit('room:create', { playerName: name, mode: gameMode });
   };
 
   const handleJoin = () => {
@@ -369,6 +391,35 @@ export function LobbyScreen() {
                 color: 'var(--fgg-gold-bright)',
               }}
             />
+          </div>
+        )}
+
+        {/* 게임 모드 선택 (방 만들기일 때만) */}
+        {mode !== 'join' && (
+          <div>
+            <label className="fgg-eyebrow" style={{ display: 'block', marginBottom: 8 }}>
+              게임 모드
+            </label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => setGameMode('recommended')}
+                style={modeBtn(gameMode === 'recommended')}
+              >
+                <span style={{ fontWeight: 700, fontSize: 13 }}>기본</span>
+                <span style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}>인원수별</span>
+                <span style={{ fontSize: 9, opacity: 0.55 }}>3인:1~9 / 4인:1~13 / 5인:1~15</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGameMode('full')}
+                style={modeBtn(gameMode === 'full')}
+              >
+                <span style={{ fontWeight: 700, fontSize: 13 }}>전체</span>
+                <span style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}>1~15 모두</span>
+                <span style={{ fontSize: 9, opacity: 0.55 }}>3인:20장 / 4인:15장 / 5인:12장</span>
+              </button>
+            </div>
           </div>
         )}
 
