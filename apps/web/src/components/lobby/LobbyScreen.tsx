@@ -394,8 +394,8 @@ export function LobbyScreen() {
           </div>
         )}
 
-        {/* 게임 모드 선택 (방 만들기일 때만) */}
-        {mode !== 'join' && (
+        {/* 게임 모드 선택 — '방 만들기' 클릭 후 mode==='create'일 때만 표시 */}
+        {mode === 'create' && (
           <div>
             <label className="fgg-eyebrow" style={{ display: 'block', marginBottom: 8 }}>
               게임 모드
@@ -427,15 +427,16 @@ export function LobbyScreen() {
           {mode !== 'join' && (
             <button
               id="btn-create"
-              onClick={() => {
-                setMode('create');
-                handleCreate();
-              }}
+              onClick={() => (mode === 'idle' ? setMode('create') : handleCreate())}
               disabled={loading}
               className="fgg-btn fgg-btn--primary"
               style={{ padding: '14px 18px', fontSize: 14 }}
             >
-              {loading && mode === 'create' ? '생성 중...' : '＋ 방 만들기'}
+              {mode === 'create'
+                ? loading
+                  ? '생성 중...'
+                  : '이 모드로 시작'
+                : '＋ 방 만들기'}
             </button>
           )}
 
