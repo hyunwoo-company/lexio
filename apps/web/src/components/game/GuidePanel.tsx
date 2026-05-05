@@ -267,6 +267,26 @@ export function GuidePanel({ open, onClose }: GuidePanelProps) {
           </div>
         </div>
 
+        {/* 비교 규칙 안내 */}
+        <div
+          style={{
+            padding: '8px 10px',
+            marginBottom: 10,
+            border: '1px dashed var(--fgg-line-strong)',
+            borderRadius: 8,
+            background: 'rgba(212,166,86,0.05)',
+            fontSize: 10,
+            lineHeight: 1.5,
+            color: 'var(--fgg-text-dim)',
+          }}
+        >
+          <strong style={{ color: 'var(--fgg-gold-bright)' }}>비교 규칙</strong> · 같은 종류끼리 만났을 땐
+          <strong style={{ color: 'var(--fgg-text)' }}> max 카드 숫자</strong>가 우선이고, 숫자가 같을 때만
+          <strong style={{ color: 'var(--fgg-text)' }}> 사신수 우열</strong>로 tie-break.
+          <br />
+          5장 콤보의 종류 자체는 <span style={{ color: 'var(--fgg-gold)' }}>스트레이트 &lt; 플러시 &lt; 풀하우스 &lt; 포카드 &lt; 스트레이트플러시</span>.
+        </div>
+
         {/* 콤보 row 리스트 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {COMBOS.map((c) => (
