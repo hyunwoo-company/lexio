@@ -42,8 +42,13 @@ export function GameBoard() {
 
   const handleLeave = () => {
     if (!confirm('정말 나가시겠습니까? 인원이 3명 미만이 되면 게임이 종료됩니다.')) return;
-    if (roomId) socket.emit('room:leave', { roomId });
-    clearSession();
+    // server 미연결 환경(/test/*, 네트워크 단절 등)에서도 안전하게 동작
+    try {
+      if (roomId && socket && socket.connected) {
+        socket.emit('room:leave', { roomId });
+      }
+    } catch {/* noop */}
+    try { clearSession(); } catch {/* noop */}
     reset();
     router.push('/');
   };
