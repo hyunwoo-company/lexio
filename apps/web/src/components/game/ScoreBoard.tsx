@@ -6,9 +6,13 @@ interface ScoreBoardProps {
   gameState: ClientGameState;
   roundResult: RoundResult;
   onReady: () => void;
+  /** 인원 부족 등으로 게임이 종료된 상태 — '다음 라운드' 대신 '로비로' 표시 */
+  isGameOver?: boolean;
+  /** 게임 종료 사유 (있다면 헤더에 표시) */
+  endReason?: string;
 }
 
-export function ScoreBoard({ gameState, roundResult, onReady }: ScoreBoardProps) {
+export function ScoreBoard({ gameState, roundResult, onReady, isGameOver, endReason }: ScoreBoardProps) {
   const playerMap = Object.fromEntries(gameState.players.map((p) => [p.id, p.name]));
   const winnerId = roundResult.exchanges.find((ex) => ex.amount > 0)?.toId;
   const winnerName = winnerId ? playerMap[winnerId] : null;
@@ -50,7 +54,7 @@ export function ScoreBoard({ gameState, roundResult, onReady }: ScoreBoardProps)
         }}
       >
         <div className="fgg-eyebrow">
-          Round {gameState.roundNumber} · 정산
+          {isGameOver ? '게임 종료' : `Round ${gameState.roundNumber} · 정산`}
         </div>
         <h1
           className="fgg-display"
@@ -62,8 +66,13 @@ export function ScoreBoard({ gameState, roundResult, onReady }: ScoreBoardProps)
             textShadow: '0 0 22px rgba(242, 200, 120, 0.4)',
           }}
         >
-          라운드 정산
+          {isGameOver ? '최종 정산' : '라운드 정산'}
         </h1>
+        {isGameOver && endReason && (
+          <div style={{ fontSize: 12, color: 'var(--fgg-jujak)', marginTop: 4, fontStyle: 'italic' }}>
+            ⚠ {endReason}
+          </div>
+        )}
         {winnerName && (
           <div style={{ fontSize: 13, color: 'var(--fgg-text-dim)', marginTop: 4 }}>
             🏆{' '}
@@ -256,7 +265,7 @@ export function ScoreBoard({ gameState, roundResult, onReady }: ScoreBoardProps)
         </ul>
       </section>
 
-      {/* 다음 라운드 */}
+      {/* 다음 라운드 / 로비로 */}
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 4 }}>
         <button
           onClick={onReady}
@@ -269,7 +278,7 @@ export function ScoreBoard({ gameState, roundResult, onReady }: ScoreBoardProps)
             minWidth: 240,
           }}
         >
-          다음 라운드 ▸
+          {isGameOver ? '로비로 돌아가기' : '다음 라운드 ▸'}
         </button>
       </div>
     </div>

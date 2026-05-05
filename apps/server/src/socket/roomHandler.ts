@@ -57,13 +57,51 @@ export function registerRoomHandlers(io: Server, socket: Socket, rooms: RoomMana
     }
   });
 
+  // 명시적 방나가기 — 게임 중이면 GameEngine에서도 제거, 인원 3명 미만이면 게임 강제 종료
+  socket.on('room:leave', ({ roomId }: { roomId: string }) => {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    const engine = room.getEngine();
+    if (engine) {
+      const result = engine.removePlayer(clientId);
+      room.leavePlayer(clientId);
+      socket.leave(roomId);
+      if (result.ended && result.roundResult) {
+        // 인원 3명 미만 → 게임 강제 종료 + 정산. state도 sync해서 phase=scoring 반영.
+        io.to(roomId).emit('game:forceEnd', {
+          reason: '인원 부족으로 게임이 종료되었습니다.',
+          roundResult: result.roundResult,
+        });
+        for (const p of room.getPlayers()) {
+          if (p.isConnected) {
+            io.to(p.socketId).emit('game:stateSync', engine.getClientState(p.id));
+          }
+        }
+      } else {
+        // 인원 변경 알림 + 모두에게 새 state sync
+        io.to(roomId).emit('room:updated', { room: room.toJSON() });
+        for (const p of room.getPlayers()) {
+          if (p.isConnected) {
+            io.to(p.socketId).emit('game:stateSync', engine.getClientState(p.id));
+          }
+        }
+      }
+    } else {
+      // 대기실에서 나가기 — 즉시 splice
+      room.leavePlayer(clientId);
+      socket.leave(roomId);
+      io.to(roomId).emit('room:updated', { room: room.toJSON() });
+      if (room.getPlayerCount() === 0) rooms.delete(roomId);
+    }
+  });
+
   socket.on('disconnecting', () => {
     const room = rooms.findBySocketId(socket.id);
     if (!room) return;
     const removed = room.removePlayer(socket.id);
     if (removed) {
       io.to(room.id).emit('room:updated', { room: room.toJSON() });
-      if (room.isEmpty()) rooms.delete(room.id);
+      // 짧은 disconnect는 grace period(60s) 동안 reconnect 가능 — 즉시 삭제하지 않음
     }
   });
 }

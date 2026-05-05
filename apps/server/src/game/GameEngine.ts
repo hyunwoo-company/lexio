@@ -32,7 +32,10 @@ export class GameEngine {
     };
   }
 
+  /** 다음 라운드 시작 시 현재 인원수에 맞춰 GameConfig 재선택 (인원이 빠졌으면 자동으로 적용됨) */
   startRound(): void {
+    // 현재 살아있는 (게임에 남아있는) 플레이어 수에 맞춰 config 재계산
+    this.playerCount = this.state.players.length as PlayerCount;
     const config = getGameConfig(this.playerCount, this.mode);
     const deck = shuffleDeck(createDeck(config));
     const hands = dealTiles(deck, config);
@@ -49,6 +52,47 @@ export class GameEngine {
       roundNumber: this.state.roundNumber + 1,
       firstPlayerId: this.state.players[firstIdx].id,
     };
+  }
+
+  /** 게임 진행 중 명시적 나가기 — player를 state에서 제거. 3명 미만이면 게임 강제 종료. */
+  removePlayer(clientId: string): { ended: boolean; roundResult?: RoundResult } {
+    const idx = this.state.players.findIndex((p) => p.id === clientId);
+    if (idx < 0) return { ended: false };
+
+    const wasCurrentTurn = this.state.players[this.state.currentPlayerIndex]?.id === clientId;
+    const wasLastPlayer = this.state.lastPlayerId === clientId;
+
+    const newPlayers = this.state.players.filter((p) => p.id !== clientId);
+
+    // 인원 3명 미만 → 게임 강제 종료 (남은 패 그대로 정산)
+    if (newPlayers.length < 3) {
+      this.state = { ...this.state, players: newPlayers, phase: 'scoring' };
+      const result = calculateScoring(newPlayers);
+      const updated = applyExchanges(newPlayers, result.exchanges).map((p) => ({ ...p, hand: [] }));
+      this.state = { ...this.state, players: updated };
+      return { ended: true, roundResult: result };
+    }
+
+    // 인원 충분 → 계속 진행. 현재 turn이거나 lastPlayer였으면 적절히 조정
+    let nextIdx = this.state.currentPlayerIndex;
+    if (wasCurrentTurn || idx <= this.state.currentPlayerIndex) {
+      nextIdx = Math.max(0, this.state.currentPlayerIndex - (idx <= this.state.currentPlayerIndex ? 1 : 0));
+      if (nextIdx >= newPlayers.length) nextIdx = 0;
+    }
+
+    this.state = {
+      ...this.state,
+      players: newPlayers,
+      currentPlayerIndex: nextIdx,
+      lastPlay: wasLastPlayer ? null : this.state.lastPlay,
+      lastPlayerId: wasLastPlayer ? null : this.state.lastPlayerId,
+      passCount: 0,
+    };
+    // currentPlayer가 손패 0개면 다음으로
+    if (this.state.players[this.state.currentPlayerIndex]?.hand.length === 0) {
+      this.advanceTurn();
+    }
+    return { ended: false };
   }
 
   playTiles(playerId: string, tileIds: string[]): { ok: boolean; reason?: string; roundResult?: RoundResult } {

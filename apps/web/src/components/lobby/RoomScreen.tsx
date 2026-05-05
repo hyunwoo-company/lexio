@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSocket, useSocket } from '@/hooks/useSocket';
 import { useGameStore, type RoomInfo } from '@/store/gameStore';
 import { GameBoard } from '@/components/game/GameBoard';
-import { getClientId, loadSession } from '@/lib/clientId';
+import { getClientId, loadSession, clearSession } from '@/lib/clientId';
 
 interface RoomScreenProps {
   roomId: string;
@@ -14,13 +15,24 @@ const MAX_SEATS = 5;
 
 export function RoomScreen({ roomId }: RoomScreenProps) {
   useSocket();
-  const { myId, gameState, roomInfo: initialRoomInfo, setRoomInfo, setRoom } = useGameStore();
+  const router = useRouter();
+  const { myId, gameState, roomInfo: initialRoomInfo, setRoomInfo, setRoom, reset } = useGameStore();
   const [room, setRoomLocal] = useState<RoomInfo | null>(initialRoomInfo);
+  const [copyMsg, setCopyMsg] = useState<string | null>(null);
   const reconnectAttempted = useRef(false);
 
   const updateRoom = (r: RoomInfo) => {
     setRoomLocal(r);
     setRoomInfo(r);
+  };
+
+  const handleLeave = () => {
+    if (!confirm('정말 나가시겠습니까? 게임 중이라면 인원 부족으로 종료될 수 있습니다.')) return;
+    const socket = getSocket();
+    socket.emit('room:leave', { roomId });
+    clearSession();
+    reset();
+    router.push('/');
   };
 
   // 새로고침 후 재연결 처리
@@ -77,9 +89,47 @@ export function RoomScreen({ roomId }: RoomScreenProps) {
   const emptySeatCount = Math.max(0, MAX_SEATS - playerCount);
   const emptySeats = Array.from({ length: emptySeatCount });
 
-  const copyRoomCode = () => {
+  const inviteUrl = (() => {
+    if (typeof window === 'undefined') return '';
+    const origin = window.location.origin;
+    return `${origin}/?roomId=${roomId}`;
+  })();
+
+  const showMsg = (msg: string) => {
+    setCopyMsg(msg);
+    setTimeout(() => setCopyMsg(null), 2000);
+  };
+
+  const handleShare = async () => {
+    const shareText = `FGG 게임에 초대합니다!\n방 코드: ${roomId}\n${inviteUrl}`;
+    // Web Share API (모바일 우선)
+    if (typeof navigator !== 'undefined' && (navigator as Navigator & { share?: (data: ShareData) => Promise<void> }).share) {
+      try {
+        await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
+          title: 'FGG 게임 초대',
+          text: shareText,
+          url: inviteUrl,
+        });
+        return;
+      } catch {/* user cancel */}
+    }
+    // 클립보드 fallback
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(roomId).catch(() => {});
+      try {
+        await navigator.clipboard.writeText(shareText);
+        showMsg('초대 링크가 복사되었습니다');
+        return;
+      } catch {/* noop */}
+    }
+    showMsg('수동으로 코드를 복사해 주세요');
+  };
+
+  const copyCode = async () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(roomId);
+        showMsg('방 코드가 복사되었습니다');
+      } catch {/* noop */}
     }
   };
 
@@ -108,6 +158,29 @@ export function RoomScreen({ roomId }: RoomScreenProps) {
           pointerEvents: 'none',
         }}
       />
+
+      {/* 좌상단 나가기 */}
+      <button
+        onClick={handleLeave}
+        style={{
+          position: 'absolute',
+          top: 16,
+          left: 16,
+          zIndex: 2,
+          background: 'rgba(10,15,13,0.7)',
+          border: '1px solid var(--fgg-line)',
+          color: 'var(--fgg-text-dim)',
+          padding: '8px 14px',
+          borderRadius: 999,
+          fontSize: 12,
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          letterSpacing: '0.04em',
+          backdropFilter: 'blur(6px)',
+        }}
+      >
+        ← 나가기
+      </button>
 
       {/* 헤더 */}
       <header
@@ -172,13 +245,32 @@ export function RoomScreen({ roomId }: RoomScreenProps) {
         >
           {roomId}
         </div>
-        <button
-          onClick={copyRoomCode}
-          className="fgg-btn"
-          style={{ padding: '6px 14px', fontSize: 12 }}
-        >
-          코드 복사
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button
+            onClick={copyCode}
+            className="fgg-btn"
+            style={{ padding: '6px 14px', fontSize: 12 }}
+          >
+            📋 코드 복사
+          </button>
+          <button
+            onClick={handleShare}
+            className="fgg-btn fgg-btn--primary"
+            style={{ padding: '6px 14px', fontSize: 12 }}
+          >
+            🔗 친구 초대
+          </button>
+        </div>
+        {copyMsg && (
+          <div style={{
+            fontSize: 11,
+            color: 'var(--fgg-gold-bright)',
+            marginTop: 4,
+            fontStyle: 'italic',
+          }}>
+            ✓ {copyMsg}
+          </div>
+        )}
       </section>
 
       {/* 참가자 그리드 */}

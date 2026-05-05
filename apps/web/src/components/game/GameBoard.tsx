@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/store/gameStore';
 import { useSocket } from '@/hooks/useSocket';
+import { clearSession } from '@/lib/clientId';
 import { PlayerSeat } from './PlayerSeat';
 import { CenterField } from './CenterField';
 import { RoundHeader } from './RoundHeader';
 import { PlayerHand } from './PlayerHand';
 import { ActionBar } from './ActionBar';
 import { ScoreBoard } from './ScoreBoard';
+import { GuidePanel } from './GuidePanel';
 import type { ClientPlayer, Tile } from '@lexio/game-logic';
 
 // 상대 좌석을 좌측 vertical list로 배치 (루미큐브 스타일) — 카드 컴팩트하게 가까이
@@ -31,9 +34,19 @@ function makeSeatedPlayers(players: ClientPlayer[], myId: string): { player: Cli
 }
 
 export function GameBoard() {
-  const { gameState, myId, roomId, selectedTileIds, clearSelection, setError, roundResult, error } = useGameStore();
+  const { gameState, myId, roomId, selectedTileIds, clearSelection, setError, roundResult, error, reset } = useGameStore();
   const socket = useSocket();
+  const router = useRouter();
   const [sortMode, setSortMode] = useState<'number' | 'suit'>('number');
+  const [guideOpen, setGuideOpen] = useState(false);
+
+  const handleLeave = () => {
+    if (!confirm('정말 나가시겠습니까? 인원이 3명 미만이 되면 게임이 종료됩니다.')) return;
+    if (roomId) socket.emit('room:leave', { roomId });
+    clearSession();
+    reset();
+    router.push('/');
+  };
 
   // viewport 방향 감지 — 세로(portrait) / 가로(landscape) 둘 다 지원
   const [isPortrait, setIsPortrait] = useState(false);
@@ -51,8 +64,10 @@ export function GameBoard() {
     };
   }, []);
 
-  // 모바일 브라우저 주소창 hide 트리거 — 여러 시점에서 시도
+  // 모바일 브라우저 주소창 hide 트리거 — 초기 mount 시점만, scoring/scroll 가능 화면 방해 안 하게
   useEffect(() => {
+    // scoring phase에선 trigger 비활성 — 정산 화면 스크롤이 막히면 다음라운드 버튼을 못 누름
+    if (gameState?.phase === 'scoring') return;
     const trigger = () => {
       try {
         window.requestAnimationFrame(() => {
@@ -70,18 +85,15 @@ export function GameBoard() {
       window.setTimeout(trigger, 100);
       window.setTimeout(trigger, 500);
     };
-    const onTouch = () => trigger();
     window.addEventListener('orientationchange', onOrientation);
-    document.addEventListener('touchend', onTouch, { once: false, passive: true });
     return () => {
       timers.forEach((t) => window.clearTimeout(t));
       window.removeEventListener('orientationchange', onOrientation);
-      document.removeEventListener('touchend', onTouch);
     };
-  }, []);
+  }, [gameState?.phase]);
 
-  // 턴 타이머 — 매 턴 시작 시 120초 reset, 0 도달 시 자동 pass
-  const TURN_SECONDS = 120;
+  // 턴 타이머 — 매 턴 시작 시 60초 reset, 0 도달 시 자동 pass
+  const TURN_SECONDS = 60;
   const [turnSecondsLeft, setTurnSecondsLeft] = useState(TURN_SECONDS);
   const currentPlayerId = gameState?.players[gameState.currentPlayerIndex]?.id;
   useEffect(() => {
@@ -125,7 +137,17 @@ export function GameBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turnSecondsLeft]);
 
+  const isGameOver = gameState.phase === 'scoring' && gameState.players.length < 3;
+
   const handleReady = () => {
+    if (isGameOver) {
+      // 인원 부족 종료 — 로비로 복귀
+      if (roomId) socket.emit('room:leave', { roomId });
+      clearSession();
+      reset();
+      router.push('/');
+      return;
+    }
     socket.emit('game:ready', { roomId });
   };
 
@@ -136,12 +158,19 @@ export function GameBoard() {
         style={{
           minHeight: '100dvh',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
           padding: 16,
+          overflowY: 'auto',
         }}
       >
-        <ScoreBoard gameState={gameState} roundResult={roundResult} onReady={handleReady} />
+        <ScoreBoard
+          gameState={gameState}
+          roundResult={roundResult}
+          onReady={handleReady}
+          isGameOver={isGameOver}
+          endReason={isGameOver ? error ?? '인원 부족으로 게임이 종료되었습니다.' : undefined}
+        />
       </div>
     );
   }
@@ -179,6 +208,60 @@ export function GameBoard() {
           zIndex: 10,
         }}
       />
+
+      {/* 좌상단: 나가기 */}
+      <button
+        onClick={handleLeave}
+        title="방 나가기"
+        style={{
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          zIndex: 8,
+          width: 36,
+          height: 36,
+          borderRadius: '50%',
+          background: 'rgba(10,15,13,0.85)',
+          border: '1px solid var(--fgg-line)',
+          color: 'var(--fgg-text-dim)',
+          fontSize: 16,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(6px)',
+        }}
+      >
+        ←
+      </button>
+
+      {/* 우상단: 족보 가이드 */}
+      <button
+        onClick={() => setGuideOpen(true)}
+        title="족보 보기"
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 70,
+          zIndex: 8,
+          width: 36,
+          height: 36,
+          borderRadius: '50%',
+          background: 'rgba(10,15,13,0.85)',
+          border: '1px solid var(--fgg-line)',
+          color: 'var(--fgg-gold-bright)',
+          fontSize: 14,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(6px)',
+        }}
+      >
+        📖
+      </button>
+
+      <GuidePanel open={guideOpen} onClose={() => setGuideOpen(false)} />
 
       {/* 라운드 헤더 */}
       <RoundHeader

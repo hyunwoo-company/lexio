@@ -14,7 +14,7 @@ export function RoundHeader({
   currentTurnName,
   roomCode,
   turnSecondsLeft,
-  turnTotalSeconds = 120,
+  turnTotalSeconds = 60,
 }: RoundHeaderProps) {
   const showTimer = typeof turnSecondsLeft === 'number';
   const pct = showTimer ? Math.max(0, Math.min(100, (turnSecondsLeft / turnTotalSeconds) * 100)) : 100;

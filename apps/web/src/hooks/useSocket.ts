@@ -37,6 +37,12 @@ export function useSocket() {
       setGameState(state);
       setRoundResult(roundResult);
     });
+    // 인원 부족으로 게임 강제 종료 — 정산 화면으로 전환 + 사유 토스트
+    s.on('game:forceEnd', ({ reason, roundResult }: { reason: string; roundResult: RoundResult }) => {
+      setError(reason);
+      setRoundResult(roundResult);
+      // gameState.phase는 서버에서 'scoring'으로 동기화됨. forceEnd 별도 플래그는 RoundResult로 표시.
+    });
     s.on('game:invalid', ({ reason }: { reason: string }) => setError(reason));
     s.on('room:error', ({ reason }: { reason: string }) => setError(reason));
 
@@ -44,6 +50,7 @@ export function useSocket() {
       s.off('game:started');
       s.off('game:stateSync');
       s.off('game:roundEnd');
+      s.off('game:forceEnd');
       s.off('game:invalid');
       s.off('room:error');
       attached.current = false;
