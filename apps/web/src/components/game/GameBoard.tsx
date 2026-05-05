@@ -209,7 +209,7 @@ export function GameBoard() {
         }}
       />
 
-      {/* 좌상단: 나가기 */}
+      {/* 좌상단: 나가기 — 황동 림(zIndex 10) 위로 표시 */}
       <button
         onClick={handleLeave}
         title="방 나가기"
@@ -217,7 +217,7 @@ export function GameBoard() {
           position: 'absolute',
           top: 8,
           left: 8,
-          zIndex: 8,
+          zIndex: 12,
           width: 36,
           height: 36,
           borderRadius: '50%',
@@ -235,15 +235,15 @@ export function GameBoard() {
         ←
       </button>
 
-      {/* 우상단: 족보 가이드 */}
+      {/* 우상단: 족보 가이드 — viewport 우측 끝, 액션바(vertical center)와 겹치지 않음 */}
       <button
         onClick={() => setGuideOpen(true)}
         title="족보 보기"
         style={{
           position: 'absolute',
           top: 8,
-          right: 70,
-          zIndex: 8,
+          right: 8,
+          zIndex: 12,
           width: 36,
           height: 36,
           borderRadius: '50%',
